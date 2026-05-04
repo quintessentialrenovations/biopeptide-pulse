@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Navbar } from "@/components/Navbar";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Video, Mic, MicOff, ChevronRight, CheckCircle, AlertTriangle, FileText,
   Shield, Stethoscope, Heart, Brain, Pill, ClipboardList, Play, ArrowRight,
-  Send, User, Bot, Volume2, VolumeX, PhoneOff,
+  Send, User, Bot, Volume2, VolumeX, PhoneOff, Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -12,6 +12,7 @@ import { useI18n } from "@/i18n/context";
 import type { TranslationKey } from "@/i18n/translations";
 import { useSpeechSynthesis, useSpeechRecognition } from "@/hooks/useSpeech";
 import doctorAvatar from "@/assets/doctor-avatar.png";
+import ReactMarkdown from "react-markdown";
 
 export const Route = createFileRoute("/consultation")({
   head: () => ({
