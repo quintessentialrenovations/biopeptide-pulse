@@ -43,89 +43,44 @@ export function Navbar() {
 
           <div className="hidden md:flex items-center gap-1">
             {visibleLinks.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                className={cn(
-                  "px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200",
-                  location.pathname === link.to
-                    ? "bg-primary/10 text-primary font-semibold"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                )}
-              >
+              <Link key={link.to} to={link.to}
+                className={cn("px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200",
+                  location.pathname === link.to ? "bg-primary/10 text-primary font-semibold" : "text-muted-foreground hover:text-foreground hover:bg-accent")}>
                 {t(link.labelKey)}
               </Link>
             ))}
 
-            {/* Language Toggle */}
             <div className="ml-2 flex items-center gap-0.5 p-1 rounded-xl bg-accent border border-border">
-              <button
-                onClick={() => setLocale("en")}
-                className={cn(
-                  "px-2.5 py-1 rounded-lg text-xs font-semibold transition-all",
-                  locale === "en"
-                    ? "bg-white text-primary shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                EN
-              </button>
-              <button
-                onClick={() => setLocale("es")}
-                className={cn(
-                  "px-2.5 py-1 rounded-lg text-xs font-semibold transition-all",
-                  locale === "es"
-                    ? "bg-white text-primary shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                ES
-              </button>
+              <button onClick={() => setLocale("en")}
+                className={cn("px-2.5 py-1 rounded-lg text-xs font-semibold transition-all",
+                  locale === "en" ? "bg-white text-primary shadow-sm" : "text-muted-foreground hover:text-foreground")}>EN</button>
+              <button onClick={() => setLocale("es")}
+                className={cn("px-2.5 py-1 rounded-lg text-xs font-semibold transition-all",
+                  locale === "es" ? "bg-white text-primary shadow-sm" : "text-muted-foreground hover:text-foreground")}>ES</button>
             </div>
 
-            {/* Auth button */}
             {user ? (
-              <button
-                onClick={handleSignOut}
-                className="ml-2 px-3 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-all flex items-center gap-1.5"
-              >
-                <LogOut className="h-3.5 w-3.5" /> Sign Out
+              <button onClick={handleSignOut}
+                className="ml-2 px-3 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-all flex items-center gap-1.5">
+                <LogOut className="h-3.5 w-3.5" /> {t("nav.signOut")}
               </button>
             ) : (
-              <Link
-                to="/login"
-                className="ml-2 px-4 py-2 rounded-xl text-sm font-semibold gradient-blue text-white transition-all"
-              >
-                Sign In
+              <Link to="/login" className="ml-2 px-4 py-2 rounded-xl text-sm font-semibold gradient-blue text-white transition-all">
+                {t("nav.signIn")}
               </Link>
             )}
           </div>
 
           <div className="flex md:hidden items-center gap-2">
             <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-accent border border-border">
-              <button
-                onClick={() => setLocale("en")}
-                className={cn(
-                  "px-2 py-1 rounded-md text-[10px] font-semibold transition-all",
-                  locale === "en" ? "bg-white text-primary shadow-sm" : "text-muted-foreground"
-                )}
-              >
-                EN
-              </button>
-              <button
-                onClick={() => setLocale("es")}
-                className={cn(
-                  "px-2 py-1 rounded-md text-[10px] font-semibold transition-all",
-                  locale === "es" ? "bg-white text-primary shadow-sm" : "text-muted-foreground"
-                )}
-              >
-                ES
-              </button>
+              <button onClick={() => setLocale("en")}
+                className={cn("px-2 py-1 rounded-md text-[10px] font-semibold transition-all",
+                  locale === "en" ? "bg-white text-primary shadow-sm" : "text-muted-foreground")}>EN</button>
+              <button onClick={() => setLocale("es")}
+                className={cn("px-2 py-1 rounded-md text-[10px] font-semibold transition-all",
+                  locale === "es" ? "bg-white text-primary shadow-sm" : "text-muted-foreground")}>ES</button>
             </div>
-            <button
-              onClick={() => setOpen(!open)}
-              className="p-2 rounded-xl hover:bg-accent text-muted-foreground"
-            >
+            <button onClick={() => setOpen(!open)} className="p-2 rounded-xl hover:bg-accent text-muted-foreground">
               {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
@@ -136,34 +91,21 @@ export function Navbar() {
         <div className="md:hidden border-t border-border/50 bg-white/95 backdrop-blur-xl">
           <div className="px-4 py-3 space-y-1">
             {visibleLinks.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                onClick={() => setOpen(false)}
-                className={cn(
-                  "block px-4 py-2.5 rounded-xl text-sm font-medium transition-colors",
-                  location.pathname === link.to
-                    ? "bg-primary/10 text-primary font-semibold"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                )}
-              >
+              <Link key={link.to} to={link.to} onClick={() => setOpen(false)}
+                className={cn("block px-4 py-2.5 rounded-xl text-sm font-medium transition-colors",
+                  location.pathname === link.to ? "bg-primary/10 text-primary font-semibold" : "text-muted-foreground hover:text-foreground hover:bg-accent")}>
                 {t(link.labelKey)}
               </Link>
             ))}
             {user ? (
-              <button
-                onClick={() => { handleSignOut(); setOpen(false); }}
-                className="block w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent"
-              >
-                Sign Out
+              <button onClick={() => { handleSignOut(); setOpen(false); }}
+                className="block w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent">
+                {t("nav.signOut")}
               </button>
             ) : (
-              <Link
-                to="/login"
-                onClick={() => setOpen(false)}
-                className="block px-4 py-2.5 rounded-xl text-sm font-semibold text-primary"
-              >
-                Sign In
+              <Link to="/login" onClick={() => setOpen(false)}
+                className="block px-4 py-2.5 rounded-xl text-sm font-semibold text-primary">
+                {t("nav.signIn")}
               </Link>
             )}
           </div>

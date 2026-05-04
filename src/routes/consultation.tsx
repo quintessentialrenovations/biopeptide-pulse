@@ -14,8 +14,8 @@ import type { TranslationKey } from "@/i18n/translations";
 export const Route = createFileRoute("/consultation")({
   head: () => ({
     meta: [
-      { title: "AI Doctor Consultation — BioPeptideX" },
-      { name: "description", content: "Speak with our AI Doctor for a personalized peptide therapy consultation." },
+      { title: "Consulta Doctor IA — BioPeptideX" },
+      { name: "description", content: "Consulta personalizada con nuestro Doctor IA sobre terapia de péptidos." },
     ],
   }),
   component: ConsultationPage,
@@ -44,9 +44,9 @@ const questionnaireSteps: QStep[] = [
   {
     id: "weight", icon: ClipboardList, titleKey: "q.healthTitle", subtitleKey: "q.healthSub",
     fields: [
-      { labelKey: "q.currentWeight", placeholder: "e.g. 105" },
-      { labelKey: "q.goalWeight", placeholder: "e.g. 85" },
-      { labelKey: "q.height", placeholder: "e.g. 175" },
+      { labelKey: "q.currentWeight", placeholder: "ej. 105" },
+      { labelKey: "q.goalWeight", placeholder: "ej. 85" },
+      { labelKey: "q.height", placeholder: "ej. 175" },
     ],
     multi: false,
   },
@@ -73,10 +73,10 @@ function ConsultationPage() {
   const [isMuted, setIsMuted] = useState(false);
   const [showRedFlag, setShowRedFlag] = useState(false);
 
-  const doctorMessages: Message[] = [
-    { role: "doctor", text: "Welcome! I'm Dr. AI, your BioPeptideX consultation guide. Based on your questionnaire, I can see you're interested in weight loss with Tirzepatide. Let me walk you through what to expect." },
-    { role: "doctor", text: "Tirzepatide is a dual GIP/GLP-1 receptor agonist. It works by mimicking two natural gut hormones — reducing appetite, slowing gastric emptying, and improving insulin sensitivity. Clinical trials showed an average weight loss of 15-22% body weight over 72 weeks." },
-    { role: "doctor", text: "Your starting dose will be 2.5mg weekly for the first 4 weeks. This allows your body to adjust gradually. Most people tolerate this very well with minimal side effects." },
+  const getDoctorMessages = (): Message[] => [
+    { role: "doctor", text: t("chat.doctorMsg1") },
+    { role: "doctor", text: t("chat.doctorMsg2") },
+    { role: "doctor", text: t("chat.doctorMsg3") },
   ];
 
   const toggleSelection = (stepId: string, option: string, multi: boolean) => {
@@ -102,7 +102,7 @@ function ConsultationPage() {
       if (dangerItems.length > 0 && !selected.includes(noneKey)) { setShowRedFlag(true); return; }
     }
     if (currentStep < questionnaireSteps.length - 1) { setCurrentStep(currentStep + 1); setShowRedFlag(false); }
-    else { setPhase("chat"); setMessages([...doctorMessages]); }
+    else { setPhase("chat"); setMessages([...getDoctorMessages()]); }
   };
 
   const handleSendChat = () => {
@@ -110,14 +110,14 @@ function ConsultationPage() {
     setMessages((prev) => [...prev, { role: "user", text: chatInput }]);
     setChatInput("");
     setTimeout(() => {
-      setMessages((prev) => [...prev, { role: "doctor", text: "That's a great question. Based on the clinical data, most patients experience the greatest appetite suppression during weeks 4-8 as the medication reaches therapeutic levels. I recommend keeping a food journal during this period to track your hunger patterns and share with your prescribing physician." }]);
+      setMessages((prev) => [...prev, { role: "doctor", text: t("chat.doctorReply") }]);
     }, 1500);
   };
 
   const advanceFromRedFlag = () => {
     setShowRedFlag(false);
     if (currentStep < questionnaireSteps.length - 1) setCurrentStep(currentStep + 1);
-    else { setPhase("chat"); setMessages([...doctorMessages]); }
+    else { setPhase("chat"); setMessages([...getDoctorMessages()]); }
   };
 
   return (
@@ -341,10 +341,10 @@ function ConsultationPage() {
   );
 }
 
-function ConsultFeature({ icon: Icon, title, desc }: { icon: typeof Brain; title: string; desc: string }) {
+function ConsultFeature({ icon: Icon, title, desc }: { icon: typeof Heart; title: string; desc: string }) {
   return (
     <div className="glass-card rounded-2xl p-5 text-center">
-      <div className="h-11 w-11 rounded-xl gradient-blue flex items-center justify-center mx-auto mb-3">
+      <div className="h-10 w-10 rounded-xl gradient-blue flex items-center justify-center mx-auto mb-3">
         <Icon className="h-5 w-5 text-white" />
       </div>
       <h3 className="text-sm font-bold text-foreground">{title}</h3>
@@ -355,8 +355,8 @@ function ConsultFeature({ icon: Icon, title, desc }: { icon: typeof Brain; title
 
 function SummaryItem({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between items-center py-2 border-b border-border/50 last:border-0">
-      <span className="text-xs text-muted-foreground font-medium">{label}</span>
+    <div className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+      <span className="text-xs font-medium text-muted-foreground">{label}</span>
       <span className="text-sm font-semibold text-foreground">{value}</span>
     </div>
   );

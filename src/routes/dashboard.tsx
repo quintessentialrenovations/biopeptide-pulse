@@ -16,8 +16,8 @@ import { useState, useEffect } from "react";
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [
-      { title: "Dashboard — BioPeptideX" },
-      { name: "description", content: "Track your peptide protocol progress, weight changes, and dose schedule." },
+      { title: "Panel — BioPeptideX" },
+      { name: "description", content: "Seguimiento de tu protocolo de péptidos, cambios de peso y calendario de dosis." },
     ],
   }),
   component: DashboardPage,
@@ -67,7 +67,7 @@ function DashboardPage() {
   if (authLoading || profileLoading || !user) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
+        <div className="animate-pulse text-muted-foreground">{t("dash.loading")}</div>
       </div>
     );
   }
@@ -78,29 +78,28 @@ function DashboardPage() {
   const totalToLose = startW - goalW;
   const lost = startW - currentW;
   const progressPercent = totalToLose > 0 ? Math.min(100, Math.round((lost / totalToLose) * 100)) : 0;
-  const firstName = profile?.full_name?.split(" ")[0] ?? "there";
+  const firstName = profile?.full_name?.split(" ")[0] ?? "";
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <main className="pt-20 pb-12 px-4 mx-auto max-w-7xl">
-        {/* Profile Summary */}
         <div className="glass-card rounded-2xl p-5 mb-6 flex items-center gap-4">
           <div className="h-12 w-12 rounded-2xl gradient-blue flex items-center justify-center shrink-0">
             <User className="h-6 w-6 text-white" />
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="text-xl font-extrabold text-foreground truncate">
-              Welcome back, {firstName}! 👋
+              {t("dash.welcomeBack")}, {firstName}! 👋
             </h1>
             <p className="text-sm text-muted-foreground mt-0.5">
-              {profile?.peptide_type ?? "Tirzepatide"} Protocol · Started {profile?.start_date ?? "N/A"}
+              {profile?.peptide_type ?? "Tirzepatide"} {t("dash.protocolLine")} {profile?.start_date ?? "N/A"}
             </p>
           </div>
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <StatCard icon={Scale} label={t("dash.currentWeight")} value={`${currentW} kg`} sub={`-${lost.toFixed(1)} kg total`} trend="down" gradient="gradient-blue" />
+          <StatCard icon={Scale} label={t("dash.currentWeight")} value={`${currentW} kg`} sub={`-${lost.toFixed(1)} kg ${t("dash.totalLost")}`} trend="down" gradient="gradient-blue" />
           <StatCard icon={Target} label={t("dash.goalProgress")} value={`${progressPercent}%`} sub={`${t("dash.target")} ${goalW} kg`} glow gradient="gradient-green" />
           <StatCard icon={TrendingDown} label={t("dash.thisWeek")} value="-1.5 kg" sub={t("dash.onTrack")} trend="down" gradient="gradient-purple" />
           <StatCard icon={Syringe} label={t("dash.currentDose")} value="2.5 mg" sub={t("dash.weekProtocol")} gradient="gradient-warm" />

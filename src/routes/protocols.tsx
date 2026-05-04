@@ -8,8 +8,8 @@ import type { TranslationKey } from "@/i18n/translations";
 export const Route = createFileRoute("/protocols")({
   head: () => ({
     meta: [
-      { title: "Protocols — BioPeptideX" },
-      { name: "description", content: "Peptide protocol database with dosing schedules and mechanisms of action." },
+      { title: "Protocolos — BioPeptideX" },
+      { name: "description", content: "Base de datos de protocolos de péptidos con esquemas de dosificación y mecanismos de acción." },
     ],
   }),
   component: ProtocolsPage,
@@ -23,30 +23,30 @@ const tirzepatideSchedule = [
   { weeks: "17+", dose: "15 mg", units: "100u", phaseKey: "proto.maintenance" as TranslationKey },
 ];
 
-const timelineKeys: { period: string; icon: typeof Clock; descKey: TranslationKey; emoji: string }[] = [
-  { period: "0–24 Hours", icon: Clock, descKey: "proto.timeline0", emoji: "💊" },
-  { period: "1–3 Days", icon: ArrowDown, descKey: "proto.timeline1", emoji: "📉" },
-  { period: "Week 1–2", icon: Flame, descKey: "proto.timeline2", emoji: "🔥" },
-  { period: "Week 3–6", icon: Flame, descKey: "proto.timeline3", emoji: "⚡" },
-  { period: "Long-Term", icon: Brain, descKey: "proto.timeline4", emoji: "🧠" },
-];
-
 function ProtocolsPage() {
   const { t } = useI18n();
+
+  const timelineKeys: { periodKey: TranslationKey; icon: typeof Clock; descKey: TranslationKey; emoji: string }[] = [
+    { periodKey: "proto.hours0_24", icon: Clock, descKey: "proto.timeline0", emoji: "💊" },
+    { periodKey: "proto.days1_3", icon: ArrowDown, descKey: "proto.timeline1", emoji: "📉" },
+    { periodKey: "proto.week1_2", icon: Flame, descKey: "proto.timeline2", emoji: "🔥" },
+    { periodKey: "proto.week3_6", icon: Flame, descKey: "proto.timeline3", emoji: "⚡" },
+    { periodKey: "proto.longTerm", icon: Brain, descKey: "proto.timeline4", emoji: "🧠" },
+  ];
 
   const protocols = [
     {
       name: "Tirzepatide",
       mechanism: t("proto.tirzepatideMechanism"),
-      startingDose: "5mg weekly",
-      targets: ["GLP-1", "GIP", "Appetite", "Insulin"],
+      startingDose: "5mg / " + t("proto.weeks").toLowerCase(),
+      targets: ["GLP-1", "GIP", t("q.appetiteControl"), "Insulina"],
       color: "#4F7AEF",
     },
     {
       name: "Retatrutide",
       mechanism: t("proto.retatrutideMechanism"),
-      startingDose: "1–2mg weekly",
-      targets: ["GLP-1", "GIP", "Glucagon", "Fat Oxidation"],
+      startingDose: "1–2mg / " + t("proto.weeks").toLowerCase(),
+      targets: ["GLP-1", "GIP", "Glucagón", t("q.metabolicHealth")],
       color: "#6BBFB5",
     },
   ];
@@ -106,7 +106,7 @@ function ProtocolsPage() {
           <p className="text-xs text-muted-foreground mb-6">{t("proto.postInjectionDesc")}</p>
           <div className="space-y-4">
             {timelineKeys.map((item, i) => (
-              <div key={item.period} className="flex items-start gap-4">
+              <div key={item.periodKey} className="flex items-start gap-4">
                 <div className="relative flex flex-col items-center">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/8 shrink-0 text-lg">
                     {item.emoji}
@@ -114,7 +114,7 @@ function ProtocolsPage() {
                   {i < timelineKeys.length - 1 && <div className="w-px h-8 bg-border mt-2" />}
                 </div>
                 <div className="pt-1.5">
-                  <h3 className="text-sm font-bold text-foreground">{item.period}</h3>
+                  <h3 className="text-sm font-bold text-foreground">{t(item.periodKey)}</h3>
                   <p className="text-sm text-muted-foreground mt-0.5 leading-relaxed">{t(item.descKey)}</p>
                 </div>
               </div>

@@ -11,8 +11,8 @@ import { lovable } from "@/integrations/lovable/index";
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
-      { title: "Login — BioPeptideX" },
-      { name: "description", content: "Sign in to your BioPeptideX account." },
+      { title: "Iniciar Sesión — BioPeptideX" },
+      { name: "description", content: "Inicia sesión en tu cuenta BioPeptideX." },
     ],
   }),
   component: LoginPage,
@@ -35,7 +35,6 @@ function LoginPage() {
 
   const isAdminEmail = email.trim().toLowerCase() === ADMIN_EMAIL;
 
-  // Redirect if already logged in
   if (user) {
     navigate({ to: "/dashboard" });
     return null;
@@ -62,14 +61,13 @@ function LoginPage() {
 
     try {
       if (isSignup) {
-        // Admin bootstrap: skip invite code for owner email
         if (!isAdminEmail) {
           if (!inviteCode.trim()) {
-            throw new Error("An invitation code is required to create an account.");
+            throw new Error(t("login.inviteRequired"));
           }
           const isValid = await validateInviteCode(inviteCode.trim());
           if (!isValid) {
-            throw new Error("Invalid or expired invitation code. Please contact your provider.");
+            throw new Error(t("login.inviteInvalid"));
           }
         }
 
@@ -83,7 +81,6 @@ function LoginPage() {
         });
         if (signUpError) throw signUpError;
 
-        // Consume the invitation code (skip for admin)
         if (signUpData.user && !isAdminEmail) {
           await supabase.rpc("use_invitation_code", {
             p_code: inviteCode.trim(),
@@ -98,7 +95,7 @@ function LoginPage() {
         navigate({ to: "/dashboard" });
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      setError(err instanceof Error ? err.message : "Error");
     } finally {
       setLoading(false);
     }
@@ -106,7 +103,7 @@ function LoginPage() {
 
   const handleGoogleSignIn = async () => {
     if (isSignup) {
-      setError("Please use email signup with an invitation code to create your account.");
+      setError(t("login.googleSignupError"));
       return;
     }
     setError("");
@@ -114,7 +111,7 @@ function LoginPage() {
       redirect_uri: window.location.origin,
     });
     if (result.error) {
-      setError(result.error instanceof Error ? result.error.message : "Google sign-in failed");
+      setError(result.error instanceof Error ? result.error.message : "Error");
     }
     if (result.redirected) return;
     navigate({ to: "/dashboard" });
@@ -127,12 +124,12 @@ function LoginPage() {
           <div className="h-16 w-16 rounded-2xl gradient-green flex items-center justify-center mx-auto mb-4">
             <Mail className="h-8 w-8 text-white" />
           </div>
-          <h2 className="text-xl font-bold text-foreground mb-2">Check Your Email</h2>
+          <h2 className="text-xl font-bold text-foreground mb-2">{t("login.checkEmail")}</h2>
           <p className="text-sm text-muted-foreground mb-6">
-            We sent a confirmation link to <strong>{email}</strong>. Click it to activate your account, then come back to sign in.
+            {t("login.checkEmailDesc")} <strong>{email}</strong>. {t("login.checkEmailAction")}
           </p>
           <Button variant="outline" onClick={() => { setConfirmationSent(false); setIsSignup(false); }}>
-            Back to Sign In
+            {t("login.backToSignIn")}
           </Button>
         </div>
       </div>
@@ -142,7 +139,6 @@ function LoginPage() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5 justify-center mb-8">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-blue">
             <Activity className="h-5 w-5 text-white" />
@@ -154,13 +150,12 @@ function LoginPage() {
 
         <div className="glass-card rounded-3xl p-8">
           <h1 className="text-2xl font-extrabold text-foreground text-center mb-1">
-            {isSignup ? "Create Your Account" : "Welcome Back"}
+            {isSignup ? t("login.createAccount") : t("login.welcomeBack")}
           </h1>
           <p className="text-sm text-muted-foreground text-center mb-6">
-            {isSignup ? "Enter your invitation code to get started" : "Sign in to your dashboard"}
+            {isSignup ? t("login.signupDesc") : t("login.signinDesc")}
           </p>
 
-          {/* Google Sign In - only for login */}
           {!isSignup && (
             <>
               <Button
@@ -174,12 +169,12 @@ function LoginPage() {
                   <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
                   <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                 </svg>
-                Continue with Google
+                {t("login.continueGoogle")}
               </Button>
 
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex-1 h-px bg-border" />
-                <span className="text-xs text-muted-foreground font-medium">or</span>
+                <span className="text-xs text-muted-foreground font-medium">{t("login.or")}</span>
                 <div className="flex-1 h-px bg-border" />
               </div>
             </>
@@ -191,7 +186,7 @@ function LoginPage() {
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="email"
-                  placeholder="Email address"
+                  placeholder={t("login.email")}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-10 h-12 rounded-2xl"
@@ -205,7 +200,7 @@ function LoginPage() {
                   <Ticket className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     type="text"
-                    placeholder="Invitation Code"
+                    placeholder={t("login.inviteCode")}
                     value={inviteCode}
                     onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
                     className="pl-10 h-12 rounded-2xl font-mono tracking-widest uppercase"
@@ -213,13 +208,13 @@ function LoginPage() {
                   />
                 </div>
                 <p className="text-[11px] text-muted-foreground mt-1.5 ml-1">
-                  💡 Your provider will give you this code
+                  {t("login.inviteHint")}
                 </p>
               </div>
             )}
             {isSignup && isAdminEmail && (
               <p className="text-sm text-emerald-600 bg-emerald-50 p-3 rounded-xl font-medium">
-                🔑 Admin account — no invitation code needed
+                {t("login.adminNoCode")}
               </p>
             )}
             <div>
@@ -227,7 +222,7 @@ function LoginPage() {
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   type={showPassword ? "text" : "password"}
-                  placeholder="Password"
+                  placeholder={t("login.password")}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="pl-10 pr-10 h-12 rounded-2xl"
@@ -249,18 +244,18 @@ function LoginPage() {
             )}
 
             <Button type="submit" variant="hero" className="w-full h-12 rounded-2xl" disabled={loading}>
-              {loading ? "Please wait..." : isSignup ? "Create Account" : "Sign In"}
+              {loading ? t("login.pleaseWait") : isSignup ? t("login.submitSignup") : t("login.submit")}
               <ArrowRight className="h-4 w-4" />
             </Button>
           </form>
 
           <p className="text-center text-sm text-muted-foreground mt-5">
-            {isSignup ? "Already have an account?" : "Don't have an account?"}{" "}
+            {isSignup ? t("login.alreadyHave") : t("login.dontHave")}{" "}
             <button
               onClick={() => { setIsSignup(!isSignup); setError(""); }}
               className="text-primary font-semibold hover:underline"
             >
-              {isSignup ? "Sign In" : "Sign Up"}
+              {isSignup ? t("login.signInLink") : t("login.signUpLink")}
             </button>
           </p>
         </div>
