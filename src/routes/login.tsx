@@ -186,7 +186,7 @@ function LoginPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {isSignup && (
+            {isSignup && !isAdminEmail && (
               <div>
                 <div className="relative">
                   <Ticket className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -203,6 +203,11 @@ function LoginPage() {
                   💡 Your provider will give you this code
                 </p>
               </div>
+            )}
+            {isSignup && isAdminEmail && (
+              <p className="text-sm text-emerald-600 bg-emerald-50 p-3 rounded-xl font-medium">
+                🔑 Admin account — no invitation code needed
+              </p>
             )}
             <div>
               <div className="relative">
