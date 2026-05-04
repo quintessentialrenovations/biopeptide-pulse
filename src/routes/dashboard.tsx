@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Navbar } from "@/components/Navbar";
 import { StatCard } from "@/components/StatCard";
 import { WeightChart } from "@/components/WeightChart";
@@ -6,7 +6,8 @@ import { DoseTimeline } from "@/components/DoseTimeline";
 import { SideEffectsPanel } from "@/components/SideEffectsPanel";
 import { InjectionSiteTracker } from "@/components/InjectionSiteTracker";
 import { MedicationLevelChart } from "@/components/MedicationLevelChart";
-import { Scale, Target, TrendingDown, Syringe, Flame, Zap, Heart, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Scale, Target, TrendingDown, Syringe, Flame, Zap, Heart, Clock, Stethoscope, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -58,6 +59,24 @@ function DashboardPage() {
             <span>Current: 96.5 kg</span>
             <span>Goal: 85 kg</span>
           </div>
+        </div>
+
+        {/* AI Doctor CTA */}
+        <div className="glass-card rounded-2xl p-5 mb-6 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="h-11 w-11 rounded-xl gradient-blue flex items-center justify-center shrink-0">
+              <Stethoscope className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-foreground">AI Doctor Consultation</p>
+              <p className="text-xs text-muted-foreground">Get a personalized assessment & Doctor-Ready Summary</p>
+            </div>
+          </div>
+          <Button variant="hero" size="sm" asChild className="rounded-xl shrink-0">
+            <Link to="/consultation">
+              Start <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </Button>
         </div>
 
         {/* Quick Log Buttons */}

@@ -8,6 +8,8 @@ import {
   Search,
   User,
   TrendingDown,
+  Stethoscope,
+  Video,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -34,14 +36,16 @@ interface Client {
   compliance: number;
   lastLog: string;
   alert?: string;
+  aiConsultation?: "completed" | "in-progress" | "not-started";
+  aiSessionDate?: string;
 }
 
 const mockClients: Client[] = [
-  { id: "1", name: "Sarah Mitchell", peptide: "Tirzepatide", dose: "7.5mg", week: 8, startWeight: 105, currentWeight: 96.5, goalWeight: 85, compliance: 96, lastLog: "Today" },
-  { id: "2", name: "James Rivera", peptide: "Retatrutide", dose: "2mg", week: 4, startWeight: 120, currentWeight: 115, goalWeight: 95, compliance: 88, lastLog: "Yesterday", alert: "Severe nausea reported" },
-  { id: "3", name: "Emily Chen", peptide: "Tirzepatide", dose: "10mg", week: 12, startWeight: 92, currentWeight: 80, goalWeight: 72, compliance: 100, lastLog: "2 days ago" },
-  { id: "4", name: "David Okafor", peptide: "Tirzepatide", dose: "5mg", week: 3, startWeight: 110, currentWeight: 108, goalWeight: 88, compliance: 67, lastLog: "5 days ago", alert: "Missed last 2 doses" },
-  { id: "5", name: "Laura Kim", peptide: "Retatrutide", dose: "1mg", week: 2, startWeight: 88, currentWeight: 86.5, goalWeight: 70, compliance: 100, lastLog: "Today" },
+  { id: "1", name: "Sarah Mitchell", peptide: "Tirzepatide", dose: "7.5mg", week: 8, startWeight: 105, currentWeight: 96.5, goalWeight: 85, compliance: 96, lastLog: "Today", aiConsultation: "completed", aiSessionDate: "Apr 28, 2026" },
+  { id: "2", name: "James Rivera", peptide: "Retatrutide", dose: "2mg", week: 4, startWeight: 120, currentWeight: 115, goalWeight: 95, compliance: 88, lastLog: "Yesterday", alert: "Severe nausea reported", aiConsultation: "completed", aiSessionDate: "Apr 20, 2026" },
+  { id: "3", name: "Emily Chen", peptide: "Tirzepatide", dose: "10mg", week: 12, startWeight: 92, currentWeight: 80, goalWeight: 72, compliance: 100, lastLog: "2 days ago", aiConsultation: "completed", aiSessionDate: "Mar 15, 2026" },
+  { id: "4", name: "David Okafor", peptide: "Tirzepatide", dose: "5mg", week: 3, startWeight: 110, currentWeight: 108, goalWeight: 88, compliance: 67, lastLog: "5 days ago", alert: "Missed last 2 doses", aiConsultation: "in-progress" },
+  { id: "5", name: "Laura Kim", peptide: "Retatrutide", dose: "1mg", week: 2, startWeight: 88, currentWeight: 86.5, goalWeight: 70, compliance: 100, lastLog: "Today", aiConsultation: "not-started" },
 ];
 
 function AdminPage() {
@@ -86,7 +90,7 @@ function AdminPage() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <OverviewStat label="Total Clients" value={String(mockClients.length)} icon="👥" />
           <OverviewStat label="Avg Compliance" value={`${Math.round(mockClients.reduce((s, c) => s + c.compliance, 0) / mockClients.length)}%`} icon="✅" />
-          <OverviewStat label="Active Alerts" value={String(alertCount)} icon="⚠️" />
+          <OverviewStat label="AI Consults Done" value={`${mockClients.filter(c => c.aiConsultation === "completed").length}/${mockClients.length}`} icon="🩺" />
           <OverviewStat label="Avg Weight Lost" value={`${(mockClients.reduce((s, c) => s + (c.startWeight - c.currentWeight), 0) / mockClients.length).toFixed(1)} kg`} icon="📉" />
         </div>
 
@@ -160,14 +164,27 @@ function AdminPage() {
                     />
                   </div>
 
-                  <div className="sm:w-52 sm:text-right">
+                  <div className="sm:w-56 sm:text-right space-y-1.5">
+                    {client.aiConsultation && (
+                      <span className={cn(
+                        "inline-flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full",
+                        client.aiConsultation === "completed" ? "bg-bio-success/10 text-bio-success" :
+                        client.aiConsultation === "in-progress" ? "bg-bio-warning/10 text-bio-warning" :
+                        "bg-accent text-muted-foreground"
+                      )}>
+                        <Stethoscope className="h-3 w-3" />
+                        {client.aiConsultation === "completed" ? `AI Consult · ${client.aiSessionDate}` :
+                         client.aiConsultation === "in-progress" ? "AI Consult in progress" :
+                         "No AI Consult"}
+                      </span>
+                    )}
                     {client.alert ? (
                       <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-bio-danger bg-bio-danger/8 px-3 py-1.5 rounded-full">
                         <AlertTriangle className="h-3 w-3" />
                         {client.alert}
                       </span>
                     ) : (
-                      <span className="text-xs text-muted-foreground font-medium">Last log: {client.lastLog}</span>
+                      <span className="text-xs text-muted-foreground font-medium block">Last log: {client.lastLog}</span>
                     )}
                   </div>
                 </div>

@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ProtocolsRouteImport } from './routes/protocols'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as ConsultationRouteImport } from './routes/consultation'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -22,6 +23,11 @@ const ProtocolsRoute = ProtocolsRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConsultationRoute = ConsultationRouteImport.update({
+  id: '/consultation',
+  path: '/consultation',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -38,12 +44,14 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/consultation': typeof ConsultationRoute
   '/dashboard': typeof DashboardRoute
   '/protocols': typeof ProtocolsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/consultation': typeof ConsultationRoute
   '/dashboard': typeof DashboardRoute
   '/protocols': typeof ProtocolsRoute
 }
@@ -51,20 +59,28 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/consultation': typeof ConsultationRoute
   '/dashboard': typeof DashboardRoute
   '/protocols': typeof ProtocolsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/dashboard' | '/protocols'
+  fullPaths: '/' | '/admin' | '/consultation' | '/dashboard' | '/protocols'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/dashboard' | '/protocols'
-  id: '__root__' | '/' | '/admin' | '/dashboard' | '/protocols'
+  to: '/' | '/admin' | '/consultation' | '/dashboard' | '/protocols'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/consultation'
+    | '/dashboard'
+    | '/protocols'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  ConsultationRoute: typeof ConsultationRoute
   DashboardRoute: typeof DashboardRoute
   ProtocolsRoute: typeof ProtocolsRoute
 }
@@ -83,6 +99,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/consultation': {
+      id: '/consultation'
+      path: '/consultation'
+      fullPath: '/consultation'
+      preLoaderRoute: typeof ConsultationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -105,6 +128,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  ConsultationRoute: ConsultationRoute,
   DashboardRoute: DashboardRoute,
   ProtocolsRoute: ProtocolsRoute,
 }
