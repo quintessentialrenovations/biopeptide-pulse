@@ -8,6 +8,7 @@ import { InjectionSiteTracker } from "@/components/InjectionSiteTracker";
 import { MedicationLevelChart } from "@/components/MedicationLevelChart";
 import { Button } from "@/components/ui/button";
 import { Scale, Target, TrendingDown, Syringe, Flame, Zap, Heart, Clock, Stethoscope, ArrowRight } from "lucide-react";
+import { useI18n } from "@/i18n/context";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -20,93 +21,81 @@ export const Route = createFileRoute("/dashboard")({
 });
 
 function DashboardPage() {
+  const { t } = useI18n();
   const progressPercent = Math.round(((105 - 96.5) / (105 - 85)) * 100);
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <main className="pt-20 pb-12 px-4 mx-auto max-w-7xl">
-        {/* Welcome Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-extrabold text-foreground">Welcome back! 👋</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Tirzepatide Protocol · Week 8 · Started Feb 10, 2026
-          </p>
+          <h1 className="text-2xl font-extrabold text-foreground">{t("dash.welcomeBack")}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t("dash.protocol")}</p>
         </div>
 
-        {/* Stats Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <StatCard icon={Scale} label="Current Weight" value="96.5 kg" sub="-8.5 kg total" trend="down" gradient="gradient-blue" />
-          <StatCard icon={Target} label="Goal Progress" value={`${progressPercent}%`} sub="Target: 85 kg" glow gradient="gradient-green" />
-          <StatCard icon={TrendingDown} label="This Week" value="-1.5 kg" sub="On track ✓" trend="down" gradient="gradient-purple" />
-          <StatCard icon={Syringe} label="Current Dose" value="7.5 mg" sub="Week 5–8 protocol" gradient="gradient-warm" />
+          <StatCard icon={Scale} label={t("dash.currentWeight")} value="96.5 kg" sub="-8.5 kg total" trend="down" gradient="gradient-blue" />
+          <StatCard icon={Target} label={t("dash.goalProgress")} value={`${progressPercent}%`} sub={`${t("dash.target")} 85 kg`} glow gradient="gradient-green" />
+          <StatCard icon={TrendingDown} label={t("dash.thisWeek")} value="-1.5 kg" sub={t("dash.onTrack")} trend="down" gradient="gradient-purple" />
+          <StatCard icon={Syringe} label={t("dash.currentDose")} value="7.5 mg" sub={t("dash.weekProtocol")} gradient="gradient-warm" />
         </div>
 
-        {/* Progress Bar */}
         <div className="glass-card rounded-2xl p-5 mb-6">
           <div className="flex items-center justify-between mb-2.5">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Progress to Goal</span>
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t("dash.progressToGoal")}</span>
             <span className="text-sm font-extrabold text-primary">{progressPercent}%</span>
           </div>
           <div className="h-3 rounded-full bg-accent overflow-hidden">
-            <div
-              className="h-full rounded-full gradient-blue transition-all duration-1000"
-              style={{ width: `${progressPercent}%` }}
-            />
+            <div className="h-full rounded-full gradient-blue transition-all duration-1000" style={{ width: `${progressPercent}%` }} />
           </div>
           <div className="flex justify-between mt-2.5 text-xs text-muted-foreground font-medium">
-            <span>Start: 105 kg</span>
-            <span>Current: 96.5 kg</span>
-            <span>Goal: 85 kg</span>
+            <span>{t("dash.start")} 105 kg</span>
+            <span>{t("dash.current")} 96.5 kg</span>
+            <span>{t("dash.goal")} 85 kg</span>
           </div>
         </div>
 
-        {/* AI Doctor CTA */}
         <div className="glass-card rounded-2xl p-5 mb-6 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="h-11 w-11 rounded-xl gradient-blue flex items-center justify-center shrink-0">
               <Stethoscope className="h-5 w-5 text-white" />
             </div>
             <div>
-              <p className="text-sm font-bold text-foreground">AI Doctor Consultation</p>
-              <p className="text-xs text-muted-foreground">Get a personalized assessment & Doctor-Ready Summary</p>
+              <p className="text-sm font-bold text-foreground">{t("dash.aiDoctorConsultation")}</p>
+              <p className="text-xs text-muted-foreground">{t("dash.aiDoctorDesc")}</p>
             </div>
           </div>
           <Button variant="hero" size="sm" asChild className="rounded-xl shrink-0">
             <Link to="/consultation">
-              Start <ArrowRight className="h-3.5 w-3.5" />
+              {t("dash.startBtn")} <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </Button>
         </div>
 
-        {/* Quick Log Buttons */}
         <div className="glass-card rounded-2xl p-5 mb-6">
-          <h3 className="text-sm font-bold text-foreground mb-3">Quick Log</h3>
+          <h3 className="text-sm font-bold text-foreground mb-3">{t("dash.quickLog")}</h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <QuickLogButton icon={Syringe} label="Log Injection" color="gradient-blue" />
-            <QuickLogButton icon={Scale} label="Log Weight" color="gradient-green" />
-            <QuickLogButton icon={Heart} label="Side Effects" color="gradient-warm" />
-            <QuickLogButton icon={Clock} label="Daily Check-in" color="gradient-purple" />
+            <QuickLogButton icon={Syringe} label={t("dash.logInjection")} color="gradient-blue" />
+            <QuickLogButton icon={Scale} label={t("dash.logWeight")} color="gradient-green" />
+            <QuickLogButton icon={Heart} label={t("dash.sideEffectsBtn")} color="gradient-warm" />
+            <QuickLogButton icon={Clock} label={t("dash.dailyCheckin")} color="gradient-purple" />
           </div>
         </div>
 
-        {/* Main Grid */}
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <WeightChart />
             <MedicationLevelChart />
-
             <div className="glass-card rounded-2xl p-6">
-              <h3 className="text-base font-bold text-foreground mb-4">This Week's Log</h3>
+              <h3 className="text-base font-bold text-foreground mb-4">{t("dash.thisWeekLog")}</h3>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <LogItem icon={Flame} label="Hunger Level" value="3/10" emoji="🍽️" />
-                <LogItem icon={Zap} label="Energy Level" value="7/10" emoji="⚡" />
-                <LogItem icon={Syringe} label="Injection Day" value="Monday" emoji="💉" />
-                <LogItem icon={Scale} label="Weekly Change" value="-1.5 kg" emoji="📉" />
+                <LogItem label={t("dash.hungerLevel")} value="3/10" emoji="🍽️" />
+                <LogItem label={t("dash.energyLevel")} value="7/10" emoji="⚡" />
+                <LogItem label={t("dash.injectionDay")} value={t("dash.monday")} emoji="💉" />
+                <LogItem label={t("dash.weeklyChange")} value="-1.5 kg" emoji="📉" />
               </div>
             </div>
           </div>
-
           <div className="space-y-6">
             <DoseTimeline />
             <InjectionSiteTracker />
@@ -129,7 +118,7 @@ function QuickLogButton({ icon: Icon, label, color }: { icon: typeof Scale; labe
   );
 }
 
-function LogItem({ icon: Icon, label, value, emoji }: { icon: typeof Scale; label: string; value: string; emoji: string }) {
+function LogItem({ label, value, emoji }: { label: string; value: string; emoji: string }) {
   return (
     <div className="rounded-xl bg-accent/50 p-4">
       <div className="text-lg mb-1">{emoji}</div>

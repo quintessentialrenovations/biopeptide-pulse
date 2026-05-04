@@ -1,18 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Navbar } from "@/components/Navbar";
-import {
-  AlertTriangle,
-  ArrowDown,
-  CheckCircle,
-  Clock,
-  Search,
-  User,
-  TrendingDown,
-  Stethoscope,
-  Video,
-} from "lucide-react";
+import { AlertTriangle, ArrowDown, CheckCircle, Clock, Search, User, Stethoscope } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/i18n/context";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -25,19 +16,10 @@ export const Route = createFileRoute("/admin")({
 });
 
 interface Client {
-  id: string;
-  name: string;
-  peptide: string;
-  dose: string;
-  week: number;
-  startWeight: number;
-  currentWeight: number;
-  goalWeight: number;
-  compliance: number;
-  lastLog: string;
-  alert?: string;
-  aiConsultation?: "completed" | "in-progress" | "not-started";
-  aiSessionDate?: string;
+  id: string; name: string; peptide: string; dose: string; week: number;
+  startWeight: number; currentWeight: number; goalWeight: number;
+  compliance: number; lastLog: string; alert?: string;
+  aiConsultation?: "completed" | "in-progress" | "not-started"; aiSessionDate?: string;
 }
 
 const mockClients: Client[] = [
@@ -49,6 +31,7 @@ const mockClients: Client[] = [
 ];
 
 function AdminPage() {
+  const { t } = useI18n();
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<"compliance" | "progress" | "name">("name");
 
@@ -70,37 +53,34 @@ function AdminPage() {
     <div className="min-h-screen bg-background">
       <Navbar />
       <main className="pt-20 pb-12 px-4 mx-auto max-w-7xl">
-        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-2xl font-extrabold text-foreground">Admin Panel</h1>
+            <h1 className="text-2xl font-extrabold text-foreground">{t("admin.title")}</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              {mockClients.length} active clients · {alertCount} alert{alertCount !== 1 && "s"}
+              {mockClients.length} {t("admin.activeClients")} · {alertCount} {alertCount !== 1 ? t("admin.alerts") : t("admin.alert")}
             </p>
           </div>
           {alertCount > 0 && (
             <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-bio-danger/8 border border-bio-danger/15">
               <AlertTriangle className="h-4 w-4 text-bio-danger" />
-              <span className="text-sm font-semibold text-bio-danger">{alertCount} clients need attention</span>
+              <span className="text-sm font-semibold text-bio-danger">{alertCount} {t("admin.needAttention")}</span>
             </div>
           )}
         </div>
 
-        {/* Overview Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <OverviewStat label="Total Clients" value={String(mockClients.length)} icon="👥" />
-          <OverviewStat label="Avg Compliance" value={`${Math.round(mockClients.reduce((s, c) => s + c.compliance, 0) / mockClients.length)}%`} icon="✅" />
-          <OverviewStat label="AI Consults Done" value={`${mockClients.filter(c => c.aiConsultation === "completed").length}/${mockClients.length}`} icon="🩺" />
-          <OverviewStat label="Avg Weight Lost" value={`${(mockClients.reduce((s, c) => s + (c.startWeight - c.currentWeight), 0) / mockClients.length).toFixed(1)} kg`} icon="📉" />
+          <OverviewStat label={t("admin.totalClients")} value={String(mockClients.length)} icon="👥" />
+          <OverviewStat label={t("admin.avgCompliance")} value={`${Math.round(mockClients.reduce((s, c) => s + c.compliance, 0) / mockClients.length)}%`} icon="✅" />
+          <OverviewStat label={t("admin.aiConsultsDone")} value={`${mockClients.filter(c => c.aiConsultation === "completed").length}/${mockClients.length}`} icon="🩺" />
+          <OverviewStat label={t("admin.avgWeightLost")} value={`${(mockClients.reduce((s, c) => s + (c.startWeight - c.currentWeight), 0) / mockClients.length).toFixed(1)} kg`} icon="📉" />
         </div>
 
-        {/* Search & Sort */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
           <div className="relative flex-1">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search clients..."
+              placeholder={t("admin.searchClients")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-10 pr-4 py-3 rounded-xl bg-white border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
@@ -118,26 +98,19 @@ function AdminPage() {
                     : "bg-white text-muted-foreground border border-border hover:bg-accent"
                 )}
               >
-                {key}
+                {key === "name" ? t("admin.name") : key === "compliance" ? t("admin.avgCompliance") : t("admin.progress")}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Client Cards */}
         <div className="space-y-3">
           {clients.map((client) => {
             const progress = Math.round(((client.startWeight - client.currentWeight) / (client.startWeight - client.goalWeight)) * 100);
             const weightLost = (client.startWeight - client.currentWeight).toFixed(1);
 
             return (
-              <div
-                key={client.id}
-                className={cn(
-                  "glass-card rounded-2xl p-5 card-hover cursor-pointer",
-                  client.alert && "border-bio-danger/30"
-                )}
-              >
+              <div key={client.id} className={cn("glass-card rounded-2xl p-5 card-hover cursor-pointer", client.alert && "border-bio-danger/30")}>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                   <div className="flex items-center gap-3 min-w-0 sm:w-56">
                     <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/8 shrink-0">
@@ -148,13 +121,12 @@ function AdminPage() {
                       <p className="text-xs text-muted-foreground">{client.peptide} · {client.dose}</p>
                     </div>
                   </div>
-
                   <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-                    <MiniStat label="Week" value={String(client.week)} />
-                    <MiniStat label="Lost" value={`${weightLost} kg`} icon={<ArrowDown className="h-3 w-3 text-bio-success" />} />
-                    <MiniStat label="Progress" value={`${progress}%`} />
+                    <MiniStat label={t("admin.week")} value={String(client.week)} />
+                    <MiniStat label={t("admin.lost")} value={`${weightLost} kg`} icon={<ArrowDown className="h-3 w-3 text-bio-success" />} />
+                    <MiniStat label={t("admin.progress")} value={`${progress}%`} />
                     <MiniStat
-                      label="Compliance"
+                      label={t("landing.compliance")}
                       value={`${client.compliance}%`}
                       icon={
                         client.compliance >= 90 ? <CheckCircle className="h-3 w-3 text-bio-success" /> :
@@ -163,7 +135,6 @@ function AdminPage() {
                       }
                     />
                   </div>
-
                   <div className="sm:w-56 sm:text-right space-y-1.5">
                     {client.aiConsultation && (
                       <span className={cn(
@@ -173,9 +144,9 @@ function AdminPage() {
                         "bg-accent text-muted-foreground"
                       )}>
                         <Stethoscope className="h-3 w-3" />
-                        {client.aiConsultation === "completed" ? `AI Consult · ${client.aiSessionDate}` :
-                         client.aiConsultation === "in-progress" ? "AI Consult in progress" :
-                         "No AI Consult"}
+                        {client.aiConsultation === "completed" ? `${t("admin.aiConsultCompleted")} · ${client.aiSessionDate}` :
+                         client.aiConsultation === "in-progress" ? t("admin.aiConsultInProgress") :
+                         t("admin.noAiConsult")}
                       </span>
                     )}
                     {client.alert ? (
@@ -184,7 +155,7 @@ function AdminPage() {
                         {client.alert}
                       </span>
                     ) : (
-                      <span className="text-xs text-muted-foreground font-medium block">Last log: {client.lastLog}</span>
+                      <span className="text-xs text-muted-foreground font-medium block">{t("admin.lastLog")} {client.lastLog}</span>
                     )}
                   </div>
                 </div>
