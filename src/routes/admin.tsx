@@ -41,11 +41,11 @@ interface Client {
 }
 
 const mockClients: Client[] = [
-  { id: "1", name: "Sarah Mitchell", peptide: "Tirzepatide", dose: "7.5mg", week: 8, startWeight: 105, currentWeight: 96.5, goalWeight: 85, compliance: 96, lastLog: "Today" },
-  { id: "2", name: "James Rivera", peptide: "Retatrutide", dose: "2mg", week: 4, startWeight: 120, currentWeight: 115, goalWeight: 95, compliance: 88, lastLog: "Yesterday", alert: "Severe nausea reported" },
-  { id: "3", name: "Emily Chen", peptide: "Tirzepatide", dose: "10mg", week: 12, startWeight: 92, currentWeight: 80, goalWeight: 72, compliance: 100, lastLog: "2 days ago" },
-  { id: "4", name: "David Okafor", peptide: "Tirzepatide", dose: "5mg", week: 3, startWeight: 110, currentWeight: 108, goalWeight: 88, compliance: 67, lastLog: "5 days ago", alert: "Missed last 2 doses" },
-  { id: "5", name: "Laura Kim", peptide: "Retatrutide", dose: "1mg", week: 2, startWeight: 88, currentWeight: 86.5, goalWeight: 70, compliance: 100, lastLog: "Today" },
+  { id: "1", name: "Sarah Mitchell", peptide: "Tirzepatide", dose: "7.5mg", week: 8, startWeight: 105, currentWeight: 96.5, goalWeight: 85, compliance: 96, lastLog: "Today", aiConsultation: "completed", aiSessionDate: "Apr 28, 2026" },
+  { id: "2", name: "James Rivera", peptide: "Retatrutide", dose: "2mg", week: 4, startWeight: 120, currentWeight: 115, goalWeight: 95, compliance: 88, lastLog: "Yesterday", alert: "Severe nausea reported", aiConsultation: "completed", aiSessionDate: "Apr 20, 2026" },
+  { id: "3", name: "Emily Chen", peptide: "Tirzepatide", dose: "10mg", week: 12, startWeight: 92, currentWeight: 80, goalWeight: 72, compliance: 100, lastLog: "2 days ago", aiConsultation: "completed", aiSessionDate: "Mar 15, 2026" },
+  { id: "4", name: "David Okafor", peptide: "Tirzepatide", dose: "5mg", week: 3, startWeight: 110, currentWeight: 108, goalWeight: 88, compliance: 67, lastLog: "5 days ago", alert: "Missed last 2 doses", aiConsultation: "in-progress" },
+  { id: "5", name: "Laura Kim", peptide: "Retatrutide", dose: "1mg", week: 2, startWeight: 88, currentWeight: 86.5, goalWeight: 70, compliance: 100, lastLog: "Today", aiConsultation: "not-started" },
 ];
 
 function AdminPage() {
