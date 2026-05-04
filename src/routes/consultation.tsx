@@ -87,6 +87,28 @@ function ConsultationPage() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Clean text for TTS: strip markdown, emojis, symbols
+  const cleanForTTS = useCallback((text: string): string => {
+    let clean = text;
+    // Remove markdown bold/italic
+    clean = clean.replace(/\*{1,3}([^*]+)\*{1,3}/g, '$1');
+    clean = clean.replace(/_{1,3}([^_]+)_{1,3}/g, '$1');
+    // Remove markdown headers
+    clean = clean.replace(/^#{1,6}\s+/gm, '');
+    // Remove markdown links
+    clean = clean.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+    // Remove markdown list bullets
+    clean = clean.replace(/^[\s]*[-*+]\s+/gm, '');
+    clean = clean.replace(/^[\s]*\d+\.\s+/gm, '');
+    // Remove emojis
+    clean = clean.replace(/[\u{1F600}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}\u{20E3}\u{E0020}-\u{E007F}]/gu, '');
+    // Remove stray asterisks
+    clean = clean.replace(/\*/g, '');
+    // Collapse whitespace
+    clean = clean.replace(/\n{3,}/g, '\n\n').trim();
+    return clean;
+  }, []);
+
   // Auto-speak completed doctor messages
   const lastSpokenRef = useRef(0);
   const prevLoadingRef = useRef(false);
@@ -96,12 +118,12 @@ function ConsultationPage() {
       const doctorMessages = messages.filter((m) => m.role === "doctor");
       if (doctorMessages.length > lastSpokenRef.current) {
         const newest = doctorMessages[doctorMessages.length - 1];
-        speak(newest.text);
+        speak(cleanForTTS(newest.text));
         lastSpokenRef.current = doctorMessages.length;
       }
     }
     prevLoadingRef.current = isAiLoading;
-  }, [isAiLoading, messages, voiceEnabled, speak]);
+  }, [isAiLoading, messages, voiceEnabled, speak, cleanForTTS]);
 
   const buildPatientContext = useCallback(() => {
     return {
@@ -422,7 +444,7 @@ function ConsultationPage() {
                 {/* Doctor avatar */}
                 <div className="relative z-10 flex flex-col items-center">
                   <div className={cn(
-                    "h-36 w-36 sm:h-44 sm:w-44 rounded-full overflow-hidden ring-4 transition-all duration-300",
+                    "h-36 w-36 sm:h-44 sm:w-44 rounded-full overflow-hidden ring-4 transition-all duration-300 relative",
                     isSpeaking
                       ? "ring-bio-success shadow-[0_0_30px_rgba(34,197,94,0.4)] scale-105"
                       : "ring-white/20 shadow-lg"
@@ -430,6 +452,12 @@ function ConsultationPage() {
                     <img src={doctorAvatar} alt="Doctor IA BioPeptideX"
                       width={512} height={512}
                       className="h-full w-full object-cover" />
+                    {/* Lip-sync overlay */}
+                    {isSpeaking && (
+                      <div className="absolute bottom-[18%] left-1/2 -translate-x-1/2 w-[28%]">
+                        <div className="lip-sync-mouth rounded-full bg-[#8B4513]/60 backdrop-blur-[1px]" />
+                      </div>
+                    )}
                   </div>
 
                   {/* Speaking indicator */}
@@ -584,6 +612,19 @@ function ConsultationPage() {
         @keyframes soundbar {
           0% { height: 4px; }
           100% { height: 18px; }
+        }
+        @keyframes lipSync {
+          0%, 100% { height: 2px; opacity: 0.4; }
+          15% { height: 6px; opacity: 0.7; }
+          30% { height: 3px; opacity: 0.5; }
+          45% { height: 8px; opacity: 0.8; }
+          60% { height: 4px; opacity: 0.6; }
+          75% { height: 7px; opacity: 0.75; }
+          90% { height: 3px; opacity: 0.5; }
+        }
+        .lip-sync-mouth {
+          animation: lipSync 0.35s ease-in-out infinite;
+          width: 100%;
         }
       `}</style>
     </div>
