@@ -36,6 +36,8 @@ interface Client {
   compliance: number;
   lastLog: string;
   alert?: string;
+  aiConsultation?: "completed" | "in-progress" | "not-started";
+  aiSessionDate?: string;
 }
 
 const mockClients: Client[] = [
