@@ -107,8 +107,13 @@ function HomePage() {
 
               <div className="mt-8 flex flex-col sm:flex-row items-start gap-3">
                 <Button variant="hero" size="lg" asChild>
+                  <Link to="/consultation">
+                    Start AI Consultation <Stethoscope className="h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button variant="outline" size="lg" asChild>
                   <Link to="/dashboard">
-                    Open My Dashboard <ArrowRight className="h-4 w-4" />
+                    Open Dashboard <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
                 <Button variant="outline" size="lg" asChild>
