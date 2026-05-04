@@ -18,6 +18,8 @@ export const Route = createFileRoute("/login")({
   component: LoginPage,
 });
 
+const ADMIN_EMAIL = "rolando.aponte13@gmail.com";
+
 function LoginPage() {
   const { t } = useI18n();
   const { user } = useAuth();
@@ -30,6 +32,8 @@ function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [confirmationSent, setConfirmationSent] = useState(false);
+
+  const isAdminEmail = email.trim().toLowerCase() === ADMIN_EMAIL;
 
   // Redirect if already logged in
   if (user) {
@@ -58,13 +62,15 @@ function LoginPage() {
 
     try {
       if (isSignup) {
-        // Validate invitation code first
-        if (!inviteCode.trim()) {
-          throw new Error("An invitation code is required to create an account.");
-        }
-        const isValid = await validateInviteCode(inviteCode.trim());
-        if (!isValid) {
-          throw new Error("Invalid or expired invitation code. Please contact your provider.");
+        // Admin bootstrap: skip invite code for owner email
+        if (!isAdminEmail) {
+          if (!inviteCode.trim()) {
+            throw new Error("An invitation code is required to create an account.");
+          }
+          const isValid = await validateInviteCode(inviteCode.trim());
+          if (!isValid) {
+            throw new Error("Invalid or expired invitation code. Please contact your provider.");
+          }
         }
 
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
@@ -72,13 +78,13 @@ function LoginPage() {
           password,
           options: {
             emailRedirectTo: window.location.origin,
-            data: { invite_code: inviteCode.trim() },
+            data: isAdminEmail ? { role: "admin" } : { invite_code: inviteCode.trim() },
           },
         });
         if (signUpError) throw signUpError;
 
-        // Consume the invitation code
-        if (signUpData.user) {
+        // Consume the invitation code (skip for admin)
+        if (signUpData.user && !isAdminEmail) {
           await supabase.rpc("use_invitation_code", {
             p_code: inviteCode.trim(),
             p_user_id: signUpData.user.id,
@@ -180,7 +186,20 @@ function LoginPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {isSignup && (
+            <div>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="email"
+                  placeholder="Email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-10 h-12 rounded-2xl"
+                  required
+                />
+              </div>
+            </div>
+            {isSignup && !isAdminEmail && (
               <div>
                 <div className="relative">
                   <Ticket className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -198,19 +217,11 @@ function LoginPage() {
                 </p>
               </div>
             )}
-            <div>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="email"
-                  placeholder="Email address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 h-12 rounded-2xl"
-                  required
-                />
-              </div>
-            </div>
+            {isSignup && isAdminEmail && (
+              <p className="text-sm text-emerald-600 bg-emerald-50 p-3 rounded-xl font-medium">
+                🔑 Admin account — no invitation code needed
+              </p>
+            )}
             <div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
