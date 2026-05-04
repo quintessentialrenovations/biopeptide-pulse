@@ -1,5 +1,4 @@
 import {
-  LineChart,
   Line,
   XAxis,
   YAxis,
@@ -23,47 +22,48 @@ const mockData = [
 
 export function WeightChart() {
   return (
-    <div className="glass-card rounded-xl p-5">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-foreground">Weight Progress</h3>
+    <div className="glass-card rounded-2xl p-6">
+      <div className="flex items-center justify-between mb-5">
+        <h3 className="text-base font-bold text-foreground">Weight Progress</h3>
         <div className="flex items-center gap-4 text-xs">
           <span className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-primary" />
-            Actual
+            <span className="h-2.5 w-2.5 rounded-full" style={{ background: "#4F7AEF" }} />
+            <span className="text-muted-foreground font-medium">Actual</span>
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-bio-cyan" />
-            Expected
+            <span className="h-2.5 w-2.5 rounded-full" style={{ background: "#6BBFB5" }} />
+            <span className="text-muted-foreground font-medium">Expected</span>
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-bio-success" />
-            Goal
+            <span className="h-2.5 w-2.5 rounded-full" style={{ background: "#34C759" }} />
+            <span className="text-muted-foreground font-medium">Goal</span>
           </span>
         </div>
       </div>
-      <ResponsiveContainer width="100%" height={260}>
+      <ResponsiveContainer width="100%" height={280}>
         <ComposedChart data={mockData}>
           <defs>
             <linearGradient id="actualGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="oklch(0.65 0.18 250)" stopOpacity={0.3} />
-              <stop offset="95%" stopColor="oklch(0.65 0.18 250)" stopOpacity={0} />
+              <stop offset="5%" stopColor="#4F7AEF" stopOpacity={0.15} />
+              <stop offset="95%" stopColor="#4F7AEF" stopOpacity={0} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.25 0.015 250 / 50%)" />
-          <XAxis dataKey="week" tick={{ fill: "oklch(0.60 0.02 250)", fontSize: 12 }} />
-          <YAxis tick={{ fill: "oklch(0.60 0.02 250)", fontSize: 12 }} domain={['dataMin - 2', 'dataMax + 2']} />
+          <CartesianGrid strokeDasharray="3 3" stroke="#E8ECF1" />
+          <XAxis dataKey="week" tick={{ fill: "#8A94A6", fontSize: 12 }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fill: "#8A94A6", fontSize: 12 }} axisLine={false} tickLine={false} domain={["dataMin - 2", "dataMax + 2"]} />
           <Tooltip
             contentStyle={{
-              backgroundColor: "oklch(0.17 0.015 250)",
-              border: "1px solid oklch(0.30 0.02 250 / 40%)",
-              borderRadius: "8px",
-              color: "oklch(0.95 0.005 250)",
+              backgroundColor: "#FFFFFF",
+              border: "1px solid #E8ECF1",
+              borderRadius: "12px",
+              color: "#1A1A2E",
+              boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
             }}
           />
           <Area type="monotone" dataKey="actual" fill="url(#actualGradient)" stroke="none" />
-          <Line type="monotone" dataKey="actual" stroke="oklch(0.65 0.18 250)" strokeWidth={2.5} dot={{ r: 4, fill: "oklch(0.65 0.18 250)" }} />
-          <Line type="monotone" dataKey="expected" stroke="oklch(0.78 0.12 200)" strokeWidth={1.5} strokeDasharray="5 5" dot={false} />
-          <Line type="monotone" dataKey="goal" stroke="oklch(0.70 0.18 155)" strokeWidth={1} strokeDasharray="2 4" dot={false} />
+          <Line type="monotone" dataKey="actual" stroke="#4F7AEF" strokeWidth={3} dot={{ r: 5, fill: "#4F7AEF", strokeWidth: 2, stroke: "#fff" }} />
+          <Line type="monotone" dataKey="expected" stroke="#6BBFB5" strokeWidth={2} strokeDasharray="6 4" dot={false} />
+          <Line type="monotone" dataKey="goal" stroke="#34C759" strokeWidth={1.5} strokeDasharray="3 5" dot={false} />
         </ComposedChart>
       </ResponsiveContainer>
     </div>
