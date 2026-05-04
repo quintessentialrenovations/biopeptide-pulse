@@ -211,7 +211,44 @@ function HomePage() {
         </div>
       </section>
 
-      {/* Disclaimer */}
+      {/* AI Doctor CTA */}
+      <section className="py-16 px-4">
+        <div className="mx-auto max-w-4xl">
+          <div className="glass-card rounded-3xl overflow-hidden">
+            <div className="grid md:grid-cols-2">
+              <div className="p-8 sm:p-10">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/8 border border-primary/15 mb-4">
+                  <Video className="h-3 w-3 text-primary" />
+                  <span className="text-[11px] font-semibold text-primary tracking-wide">NEW FEATURE</span>
+                </div>
+                <h2 className="text-2xl font-extrabold text-foreground mb-3">
+                  AI Doctor <span className="text-gradient-blue">Consultation</span>
+                </h2>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+                  Before you start your peptide journey, have a comprehensive one-on-one
+                  consultation with our AI Doctor. Get personalized education, safety
+                  screening, and a professional Doctor-Ready Summary PDF for your physician.
+                </p>
+                <Button variant="hero" size="lg" asChild className="rounded-2xl">
+                  <Link to="/consultation">
+                    Start Free Consultation <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+              <div className="gradient-blue flex items-center justify-center p-8">
+                <div className="text-center text-white">
+                  <div className="h-20 w-20 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-4">
+                    <Stethoscope className="h-10 w-10" />
+                  </div>
+                  <p className="text-lg font-bold">Dr. AI</p>
+                  <p className="text-xs opacity-80 mt-1">~10 min · Free · Private</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="py-12 px-4 border-t border-border/50">
         <div className="mx-auto max-w-3xl text-center">
           <p className="text-xs text-muted-foreground leading-relaxed">
