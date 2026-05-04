@@ -90,7 +90,7 @@ function AdminPage() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <OverviewStat label="Total Clients" value={String(mockClients.length)} icon="👥" />
           <OverviewStat label="Avg Compliance" value={`${Math.round(mockClients.reduce((s, c) => s + c.compliance, 0) / mockClients.length)}%`} icon="✅" />
-          <OverviewStat label="Active Alerts" value={String(alertCount)} icon="⚠️" />
+          <OverviewStat label="AI Consults Done" value={`${mockClients.filter(c => c.aiConsultation === "completed").length}/${mockClients.length}`} icon="🩺" />
           <OverviewStat label="Avg Weight Lost" value={`${(mockClients.reduce((s, c) => s + (c.startWeight - c.currentWeight), 0) / mockClients.length).toFixed(1)} kg`} icon="📉" />
         </div>
 
