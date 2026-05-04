@@ -34,28 +34,34 @@ export const Route = createFileRoute("/")({
 
 const features = [
   {
+    icon: Stethoscope,
+    title: "AI Doctor Consultation",
+    desc: "One-on-one video-style AI consultation. Smart questionnaire, contraindication screening, and a Doctor-Ready Summary PDF.",
+    gradient: "gradient-blue",
+  },
+  {
     icon: BarChart3,
     title: "Beautiful Progress Charts",
     desc: "Interactive weight charts with actual vs expected vs goal overlays, medication level tracking, and dose-colored trends.",
-    gradient: "gradient-blue",
+    gradient: "gradient-green",
   },
   {
     icon: Syringe,
     title: "One-Tap Injection Logging",
     desc: "Log your weekly dose in seconds. Track injection sites, get rotation suggestions, and see your remaining vial usage.",
-    gradient: "gradient-green",
+    gradient: "gradient-purple",
   },
   {
     icon: Shield,
     title: "Side Effect Support",
     desc: "Interactive guide with severity tracking, smart fixes, and actionable recommendations to stay comfortable.",
-    gradient: "gradient-purple",
+    gradient: "gradient-warm",
   },
   {
     icon: Users,
     title: "Admin CRM Dashboard",
-    desc: "Monitor all clients at a glance. Track compliance, spot risks, adjust protocols, and send personalized guidance.",
-    gradient: "gradient-warm",
+    desc: "Monitor all clients at a glance. Track compliance, spot risks, adjust protocols, and review AI consultation data.",
+    gradient: "gradient-blue",
   },
 ];
 
