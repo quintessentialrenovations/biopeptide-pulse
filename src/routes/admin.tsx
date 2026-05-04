@@ -164,14 +164,27 @@ function AdminPage() {
                     />
                   </div>
 
-                  <div className="sm:w-52 sm:text-right">
+                  <div className="sm:w-56 sm:text-right space-y-1.5">
+                    {client.aiConsultation && (
+                      <span className={cn(
+                        "inline-flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full",
+                        client.aiConsultation === "completed" ? "bg-bio-success/10 text-bio-success" :
+                        client.aiConsultation === "in-progress" ? "bg-bio-warning/10 text-bio-warning" :
+                        "bg-accent text-muted-foreground"
+                      )}>
+                        <Stethoscope className="h-3 w-3" />
+                        {client.aiConsultation === "completed" ? `AI Consult · ${client.aiSessionDate}` :
+                         client.aiConsultation === "in-progress" ? "AI Consult in progress" :
+                         "No AI Consult"}
+                      </span>
+                    )}
                     {client.alert ? (
                       <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-bio-danger bg-bio-danger/8 px-3 py-1.5 rounded-full">
                         <AlertTriangle className="h-3 w-3" />
                         {client.alert}
                       </span>
                     ) : (
-                      <span className="text-xs text-muted-foreground font-medium">Last log: {client.lastLog}</span>
+                      <span className="text-xs text-muted-foreground font-medium block">Last log: {client.lastLog}</span>
                     )}
                   </div>
                 </div>
