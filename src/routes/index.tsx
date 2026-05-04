@@ -85,7 +85,7 @@ function HomePage() {
               <div className="mt-8 flex flex-col sm:flex-row items-start gap-3">
                 <Button variant="hero" size="lg" asChild>
                   <Link to="/login">
-                    Get Started <ArrowRight className="h-4 w-4" />
+                    {t("landing.getStarted")} <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
                 <Button variant="outline" size="lg" asChild>
