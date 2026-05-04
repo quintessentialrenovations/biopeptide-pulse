@@ -61,6 +61,24 @@ function DashboardPage() {
           </div>
         </div>
 
+        {/* AI Doctor CTA */}
+        <div className="glass-card rounded-2xl p-5 mb-6 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="h-11 w-11 rounded-xl gradient-blue flex items-center justify-center shrink-0">
+              <Stethoscope className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-foreground">AI Doctor Consultation</p>
+              <p className="text-xs text-muted-foreground">Get a personalized assessment & Doctor-Ready Summary</p>
+            </div>
+          </div>
+          <Button variant="hero" size="sm" asChild className="rounded-xl shrink-0">
+            <Link to="/consultation">
+              Start <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </Button>
+        </div>
+
         {/* Quick Log Buttons */}
         <div className="glass-card rounded-2xl p-5 mb-6">
           <h3 className="text-sm font-bold text-foreground mb-3">Quick Log</h3>
