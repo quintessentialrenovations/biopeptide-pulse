@@ -62,13 +62,15 @@ function LoginPage() {
 
     try {
       if (isSignup) {
-        // Validate invitation code first
-        if (!inviteCode.trim()) {
-          throw new Error("An invitation code is required to create an account.");
-        }
-        const isValid = await validateInviteCode(inviteCode.trim());
-        if (!isValid) {
-          throw new Error("Invalid or expired invitation code. Please contact your provider.");
+        // Admin bootstrap: skip invite code for owner email
+        if (!isAdminEmail) {
+          if (!inviteCode.trim()) {
+            throw new Error("An invitation code is required to create an account.");
+          }
+          const isValid = await validateInviteCode(inviteCode.trim());
+          if (!isValid) {
+            throw new Error("Invalid or expired invitation code. Please contact your provider.");
+          }
         }
 
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
@@ -76,13 +78,13 @@ function LoginPage() {
           password,
           options: {
             emailRedirectTo: window.location.origin,
-            data: { invite_code: inviteCode.trim() },
+            data: isAdminEmail ? { role: "admin" } : { invite_code: inviteCode.trim() },
           },
         });
         if (signUpError) throw signUpError;
 
-        // Consume the invitation code
-        if (signUpData.user) {
+        // Consume the invitation code (skip for admin)
+        if (signUpData.user && !isAdminEmail) {
           await supabase.rpc("use_invitation_code", {
             p_code: inviteCode.trim(),
             p_user_id: signUpData.user.id,
