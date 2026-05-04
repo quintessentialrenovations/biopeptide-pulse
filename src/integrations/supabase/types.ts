@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      invitation_codes: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          max_uses: number
+          times_used: number
+          used_by: string[] | null
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          max_uses?: number
+          times_used?: number
+          used_by?: string[] | null
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          max_uses?: number
+          times_used?: number
+          used_by?: string[] | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age: number | null
@@ -106,7 +142,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      use_invitation_code: {
+        Args: { p_code: string; p_user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
