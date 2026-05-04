@@ -12,6 +12,8 @@ import {
   Bell,
   Sparkles,
   CheckCircle,
+  Stethoscope,
+  Video,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/Navbar";
