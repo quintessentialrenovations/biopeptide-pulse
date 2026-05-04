@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { Check, RotateCcw } from "lucide-react";
+import { useI18n } from "@/i18n/context";
+import type { TranslationKey } from "@/i18n/translations";
 
-const sites = [
-  { id: "abdomen-left", label: "Abdomen (Left)", region: "Abdomen" },
-  { id: "abdomen-right", label: "Abdomen (Right)", region: "Abdomen" },
-  { id: "thigh-left", label: "Thigh (Left)", region: "Thigh" },
-  { id: "thigh-right", label: "Thigh (Right)", region: "Thigh" },
-  { id: "arm-left", label: "Arm (Left)", region: "Arm" },
-  { id: "arm-right", label: "Arm (Right)", region: "Arm" },
+const sites: { id: string; labelKey: TranslationKey; region: string }[] = [
+  { id: "abdomen-left", labelKey: "comp.abdomenLeft", region: "Abdomen" },
+  { id: "abdomen-right", labelKey: "comp.abdomenRight", region: "Abdomen" },
+  { id: "thigh-left", labelKey: "comp.thighLeft", region: "Thigh" },
+  { id: "thigh-right", labelKey: "comp.thighRight", region: "Thigh" },
+  { id: "arm-left", labelKey: "comp.armLeft", region: "Arm" },
+  { id: "arm-right", labelKey: "comp.armRight", region: "Arm" },
 ];
 
 const history = [
@@ -19,33 +21,31 @@ const history = [
 ];
 
 export function InjectionSiteTracker() {
+  const { t } = useI18n();
   const [selected, setSelected] = useState("abdomen-left");
   const lastUsed = history[0]?.site;
-  
-  // Smart suggestion: pick the site least recently used
+
   const usedSites = history.map(h => h.site);
-  const suggested = sites.find(s => !usedSites.includes(s.id))?.id ?? 
+  const suggested = sites.find(s => !usedSites.includes(s.id))?.id ??
     sites.find(s => s.id !== lastUsed)?.id ?? sites[0].id;
 
   return (
     <div className="glass-card rounded-2xl p-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-base font-bold text-foreground">Injection Sites</h3>
+        <h3 className="text-base font-bold text-foreground">{t("comp.injectionSitesTitle")}</h3>
         <div className="flex items-center gap-1.5 text-xs text-primary font-medium">
           <RotateCcw className="h-3 w-3" />
-          Rotation Tracker
+          {t("comp.rotationTracker")}
         </div>
       </div>
 
-      {/* Suggested site */}
       <div className="mb-4 rounded-xl bg-bio-success/8 border border-bio-success/15 p-3.5">
-        <p className="text-xs font-semibold text-bio-success uppercase tracking-wider mb-0.5">Suggested Next</p>
+        <p className="text-xs font-semibold text-bio-success uppercase tracking-wider mb-0.5">{t("comp.suggestedNext")}</p>
         <p className="text-sm font-bold text-foreground">
-          {sites.find(s => s.id === suggested)?.label}
+          {t(sites.find(s => s.id === suggested)!.labelKey)}
         </p>
       </div>
 
-      {/* Site grid */}
       <div className="grid grid-cols-2 gap-2 mb-4">
         {sites.map(site => {
           const isLast = site.id === lastUsed;
@@ -63,24 +63,23 @@ export function InjectionSiteTracker() {
               }`}
             >
               <div className="flex items-center justify-between">
-                <span>{site.label}</span>
-                {isLast && <span className="text-[9px] text-muted-foreground font-bold uppercase">Last</span>}
-                {isSuggested && !isLast && <span className="text-[9px] text-bio-success font-bold uppercase">Next</span>}
+                <span>{t(site.labelKey)}</span>
+                {isLast && <span className="text-[9px] text-muted-foreground font-bold uppercase">{t("comp.last")}</span>}
+                {isSuggested && !isLast && <span className="text-[9px] text-bio-success font-bold uppercase">{t("comp.next")}</span>}
               </div>
             </button>
           );
         })}
       </div>
 
-      {/* Recent history */}
       <div>
-        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Recent</p>
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">{t("comp.recent")}</p>
         <div className="space-y-1.5">
           {history.slice(0, 3).map((h, i) => (
             <div key={i} className="flex items-center justify-between text-xs py-1">
               <div className="flex items-center gap-2">
                 <Check className="h-3 w-3 text-bio-success" />
-                <span className="text-foreground font-medium">{sites.find(s => s.id === h.site)?.label}</span>
+                <span className="text-foreground font-medium">{t(sites.find(s => s.id === h.site)!.labelKey)}</span>
               </div>
               <span className="text-muted-foreground">{h.date}</span>
             </div>

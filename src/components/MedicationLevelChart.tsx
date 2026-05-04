@@ -8,27 +8,30 @@ import {
   Area,
   ComposedChart,
 } from "recharts";
-
-const medLevelData = [
-  { day: "Mon", level: 85, dose: true },
-  { day: "Tue", level: 92 },
-  { day: "Wed", level: 78 },
-  { day: "Thu", level: 65 },
-  { day: "Fri", level: 52 },
-  { day: "Sat", level: 40 },
-  { day: "Sun", level: 30 },
-];
+import { useI18n } from "@/i18n/context";
 
 export function MedicationLevelChart() {
+  const { t } = useI18n();
+
+  const medLevelData = [
+    { day: t("comp.mon"), level: 85, dose: true },
+    { day: t("comp.tue"), level: 92 },
+    { day: t("comp.wed"), level: 78 },
+    { day: t("comp.thu"), level: 65 },
+    { day: t("comp.fri"), level: 52 },
+    { day: t("comp.sat"), level: 40 },
+    { day: t("comp.sun"), level: 30 },
+  ];
+
   return (
     <div className="glass-card rounded-2xl p-6">
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h3 className="text-base font-bold text-foreground">Estimated Medication Levels</h3>
-          <p className="text-xs text-muted-foreground mt-0.5">Approximate active compound in your system</p>
+          <h3 className="text-base font-bold text-foreground">{t("comp.medLevels")}</h3>
+          <p className="text-xs text-muted-foreground mt-0.5">{t("comp.medLevelsSub")}</p>
         </div>
         <div className="px-3 py-1.5 rounded-full bg-bio-cyan/10 text-bio-cyan text-xs font-semibold">
-          Active
+          {t("comp.active")}
         </div>
       </div>
       <ResponsiveContainer width="100%" height={200}>

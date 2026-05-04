@@ -8,6 +8,7 @@ import {
   Area,
   ComposedChart,
 } from "recharts";
+import { useI18n } from "@/i18n/context";
 
 const mockData = [
   { week: "W1", actual: 105, expected: 104.5, goal: 85 },
@@ -21,22 +22,23 @@ const mockData = [
 ];
 
 export function WeightChart() {
+  const { t } = useI18n();
   return (
     <div className="glass-card rounded-2xl p-6">
       <div className="flex items-center justify-between mb-5">
-        <h3 className="text-base font-bold text-foreground">Weight Progress</h3>
+        <h3 className="text-base font-bold text-foreground">{t("comp.weightProgress")}</h3>
         <div className="flex items-center gap-4 text-xs">
           <span className="flex items-center gap-1.5">
             <span className="h-2.5 w-2.5 rounded-full" style={{ background: "#4F7AEF" }} />
-            <span className="text-muted-foreground font-medium">Actual</span>
+            <span className="text-muted-foreground font-medium">{t("comp.actual")}</span>
           </span>
           <span className="flex items-center gap-1.5">
             <span className="h-2.5 w-2.5 rounded-full" style={{ background: "#6BBFB5" }} />
-            <span className="text-muted-foreground font-medium">Expected</span>
+            <span className="text-muted-foreground font-medium">{t("comp.expected")}</span>
           </span>
           <span className="flex items-center gap-1.5">
             <span className="h-2.5 w-2.5 rounded-full" style={{ background: "#34C759" }} />
-            <span className="text-muted-foreground font-medium">Goal</span>
+            <span className="text-muted-foreground font-medium">{t("comp.goalLine")}</span>
           </span>
         </div>
       </div>
