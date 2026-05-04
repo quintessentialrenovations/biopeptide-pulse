@@ -15,7 +15,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       const saved = localStorage.getItem("biopeptidex-locale");
       if (saved === "en" || saved === "es") return saved;
     }
-    return "en";
+    return "es";
   });
 
   const handleSetLocale = useCallback((newLocale: Locale) => {
