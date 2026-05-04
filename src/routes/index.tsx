@@ -84,13 +84,13 @@ function HomePage() {
 
               <div className="mt-8 flex flex-col sm:flex-row items-start gap-3">
                 <Button variant="hero" size="lg" asChild>
-                  <Link to="/consultation">
-                    {t("landing.startConsultation")} <Stethoscope className="h-4 w-4" />
+                  <Link to="/login">
+                    Get Started <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
                 <Button variant="outline" size="lg" asChild>
-                  <Link to="/dashboard">
-                    {t("landing.openDashboard")} <ArrowRight className="h-4 w-4" />
+                  <Link to="/consultation">
+                    {t("landing.startConsultation")} <Stethoscope className="h-4 w-4" />
                   </Link>
                 </Button>
                 <Button variant="outline" size="lg" asChild>

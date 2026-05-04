@@ -10,6 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ProtocolsRouteImport } from './routes/protocols'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ConsultationRouteImport } from './routes/consultation'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -18,6 +20,16 @@ import { Route as IndexRouteImport } from './routes/index'
 const ProtocolsRoute = ProtocolsRouteImport.update({
   id: '/protocols',
   path: '/protocols',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -46,6 +58,8 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/consultation': typeof ConsultationRoute
   '/dashboard': typeof DashboardRoute
+  '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
   '/protocols': typeof ProtocolsRoute
 }
 export interface FileRoutesByTo {
@@ -53,6 +67,8 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/consultation': typeof ConsultationRoute
   '/dashboard': typeof DashboardRoute
+  '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
   '/protocols': typeof ProtocolsRoute
 }
 export interface FileRoutesById {
@@ -61,19 +77,37 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/consultation': typeof ConsultationRoute
   '/dashboard': typeof DashboardRoute
+  '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
   '/protocols': typeof ProtocolsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/consultation' | '/dashboard' | '/protocols'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/consultation'
+    | '/dashboard'
+    | '/login'
+    | '/onboarding'
+    | '/protocols'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/consultation' | '/dashboard' | '/protocols'
+  to:
+    | '/'
+    | '/admin'
+    | '/consultation'
+    | '/dashboard'
+    | '/login'
+    | '/onboarding'
+    | '/protocols'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/consultation'
     | '/dashboard'
+    | '/login'
+    | '/onboarding'
     | '/protocols'
   fileRoutesById: FileRoutesById
 }
@@ -82,6 +116,8 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   ConsultationRoute: typeof ConsultationRoute
   DashboardRoute: typeof DashboardRoute
+  LoginRoute: typeof LoginRoute
+  OnboardingRoute: typeof OnboardingRoute
   ProtocolsRoute: typeof ProtocolsRoute
 }
 
@@ -92,6 +128,20 @@ declare module '@tanstack/react-router' {
       path: '/protocols'
       fullPath: '/protocols'
       preLoaderRoute: typeof ProtocolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -130,6 +180,8 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   ConsultationRoute: ConsultationRoute,
   DashboardRoute: DashboardRoute,
+  LoginRoute: LoginRoute,
+  OnboardingRoute: OnboardingRoute,
   ProtocolsRoute: ProtocolsRoute,
 }
 export const routeTree = rootRouteImport
