@@ -256,7 +256,9 @@ function ConsultationPage() {
     else {
       lastSpokenRef.current = 0;
       setPhase("chat");
-      setMessages([...getDoctorMessages()]);
+      const initialMsg: Message = { role: "user", text: "Hola Doctor, tengo algunas condiciones médicas pero quiero continuar con la consulta." };
+      setMessages([initialMsg]);
+      streamAiResponse([initialMsg]);
     }
   };
 
