@@ -1,4 +1,5 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { I18nProvider } from "@/i18n/context";
 
 import appCss from "../styles.css?url";
 
