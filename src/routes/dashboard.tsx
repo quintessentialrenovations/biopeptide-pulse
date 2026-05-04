@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Navbar } from "@/components/Navbar";
 import { StatCard } from "@/components/StatCard";
 import { WeightChart } from "@/components/WeightChart";
@@ -6,7 +6,8 @@ import { DoseTimeline } from "@/components/DoseTimeline";
 import { SideEffectsPanel } from "@/components/SideEffectsPanel";
 import { InjectionSiteTracker } from "@/components/InjectionSiteTracker";
 import { MedicationLevelChart } from "@/components/MedicationLevelChart";
-import { Scale, Target, TrendingDown, Syringe, Flame, Zap, Heart, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Scale, Target, TrendingDown, Syringe, Flame, Zap, Heart, Clock, Stethoscope, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
