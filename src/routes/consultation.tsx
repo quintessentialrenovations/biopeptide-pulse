@@ -485,7 +485,18 @@ function ConsultationPage() {
                   </div>
                   <div className={cn("max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed",
                     msg.role === "doctor" ? "bg-accent text-foreground" : "bg-primary text-white")}>
-                    {msg.text}
+                    {msg.role === "doctor" ? (
+                      msg.text ? (
+                        <div className="prose prose-sm max-w-none [&>p]:my-1 [&>ul]:my-1 [&>ol]:my-1">
+                          <ReactMarkdown>{msg.text}</ReactMarkdown>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <span className="text-xs text-muted-foreground">Pensando...</span>
+                        </div>
+                      )
+                    ) : msg.text}
                   </div>
                 </div>
               ))}
