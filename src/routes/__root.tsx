@@ -1,5 +1,4 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
-import { I18nProvider } from "@/i18n/context";
 
 import appCss from "../styles.css?url";
 
@@ -30,14 +29,18 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "BioPeptideX" },
+      { name: "description", content: "Tracks client progress and protocols for performance peptides like Tirzepatide and Retatrutide." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "BioPeptideX" },
+      { property: "og:description", content: "Tracks client progress and protocols for performance peptides like Tirzepatide and Retatrutide." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "BioPeptideX" },
+      { name: "twitter:description", content: "Tracks client progress and protocols for performance peptides like Tirzepatide and Retatrutide." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7ba4495e-ef72-4ba2-bd60-c0e1e76a5623/id-preview-c9703b36--a89fa247-b936-413d-949a-dc2ae0d1a94d.lovable.app-1777866256200.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7ba4495e-ef72-4ba2-bd60-c0e1e76a5623/id-preview-c9703b36--a89fa247-b936-413d-949a-dc2ae0d1a94d.lovable.app-1777866256200.png" },
     ],
     links: [
       {
@@ -66,9 +69,5 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
-  return (
-    <I18nProvider>
-      <Outlet />
-    </I18nProvider>
-  );
+  return <Outlet />;
 }
