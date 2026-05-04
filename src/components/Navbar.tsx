@@ -1,19 +1,22 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { Activity, Menu, X } from "lucide-react";
+import { Activity, Menu, X, Globe } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/i18n/context";
+import type { TranslationKey } from "@/i18n/translations";
 
-const navLinks = [
-  { to: "/" as const, label: "Home" },
-  { to: "/dashboard" as const, label: "Dashboard" },
-  { to: "/consultation" as const, label: "AI Doctor" },
-  { to: "/protocols" as const, label: "Protocols" },
-  { to: "/admin" as const, label: "Admin" },
+const navLinks: { to: "/" | "/dashboard" | "/consultation" | "/protocols" | "/admin"; labelKey: TranslationKey }[] = [
+  { to: "/", labelKey: "nav.home" },
+  { to: "/dashboard", labelKey: "nav.dashboard" },
+  { to: "/consultation", labelKey: "nav.aiDoctor" },
+  { to: "/protocols", labelKey: "nav.protocols" },
+  { to: "/admin", labelKey: "nav.admin" },
 ];
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
+  const { locale, setLocale, t } = useI18n();
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-border/60">
@@ -40,17 +43,66 @@ export function Navbar() {
                     : "text-muted-foreground hover:text-foreground hover:bg-accent"
                 )}
               >
-                {link.label}
+                {t(link.labelKey)}
               </Link>
             ))}
+
+            {/* Language Toggle */}
+            <div className="ml-2 flex items-center gap-0.5 p-1 rounded-xl bg-accent border border-border">
+              <button
+                onClick={() => setLocale("en")}
+                className={cn(
+                  "px-2.5 py-1 rounded-lg text-xs font-semibold transition-all",
+                  locale === "en"
+                    ? "bg-white text-primary shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                EN
+              </button>
+              <button
+                onClick={() => setLocale("es")}
+                className={cn(
+                  "px-2.5 py-1 rounded-lg text-xs font-semibold transition-all",
+                  locale === "es"
+                    ? "bg-white text-primary shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                ES
+              </button>
+            </div>
           </div>
 
-          <button
-            onClick={() => setOpen(!open)}
-            className="md:hidden p-2 rounded-xl hover:bg-accent text-muted-foreground"
-          >
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
+          <div className="flex md:hidden items-center gap-2">
+            {/* Mobile language toggle */}
+            <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-accent border border-border">
+              <button
+                onClick={() => setLocale("en")}
+                className={cn(
+                  "px-2 py-1 rounded-md text-[10px] font-semibold transition-all",
+                  locale === "en" ? "bg-white text-primary shadow-sm" : "text-muted-foreground"
+                )}
+              >
+                EN
+              </button>
+              <button
+                onClick={() => setLocale("es")}
+                className={cn(
+                  "px-2 py-1 rounded-md text-[10px] font-semibold transition-all",
+                  locale === "es" ? "bg-white text-primary shadow-sm" : "text-muted-foreground"
+                )}
+              >
+                ES
+              </button>
+            </div>
+            <button
+              onClick={() => setOpen(!open)}
+              className="p-2 rounded-xl hover:bg-accent text-muted-foreground"
+            >
+              {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -69,7 +121,7 @@ export function Navbar() {
                     : "text-muted-foreground hover:text-foreground hover:bg-accent"
                 )}
               >
-                {link.label}
+                {t(link.labelKey)}
               </Link>
             ))}
           </div>
