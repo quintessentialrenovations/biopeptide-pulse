@@ -7,6 +7,7 @@ import {
   Clock,
   Search,
   User,
+  TrendingDown,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -65,30 +66,40 @@ function AdminPage() {
     <div className="min-h-screen bg-background">
       <Navbar />
       <main className="pt-20 pb-12 px-4 mx-auto max-w-7xl">
+        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Admin Panel</h1>
+            <h1 className="text-2xl font-extrabold text-foreground">Admin Panel</h1>
             <p className="text-sm text-muted-foreground mt-1">
               {mockClients.length} active clients · {alertCount} alert{alertCount !== 1 && "s"}
             </p>
           </div>
           {alertCount > 0 && (
-            <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-bio-danger/10 border border-bio-danger/20">
+            <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-bio-danger/8 border border-bio-danger/15">
               <AlertTriangle className="h-4 w-4 text-bio-danger" />
-              <span className="text-sm font-medium text-bio-danger">{alertCount} clients need attention</span>
+              <span className="text-sm font-semibold text-bio-danger">{alertCount} clients need attention</span>
             </div>
           )}
         </div>
 
+        {/* Overview Stats */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <OverviewStat label="Total Clients" value={String(mockClients.length)} icon="👥" />
+          <OverviewStat label="Avg Compliance" value={`${Math.round(mockClients.reduce((s, c) => s + c.compliance, 0) / mockClients.length)}%`} icon="✅" />
+          <OverviewStat label="Active Alerts" value={String(alertCount)} icon="⚠️" />
+          <OverviewStat label="Avg Weight Lost" value={`${(mockClients.reduce((s, c) => s + (c.startWeight - c.currentWeight), 0) / mockClients.length).toFixed(1)} kg`} icon="📉" />
+        </div>
+
+        {/* Search & Sort */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search clients..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-input border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+              className="w-full pl-10 pr-4 py-3 rounded-xl bg-white border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
             />
           </div>
           <div className="flex gap-2">
@@ -97,10 +108,10 @@ function AdminPage() {
                 key={key}
                 onClick={() => setSortBy(key)}
                 className={cn(
-                  "px-4 py-2 rounded-lg text-xs font-medium transition-colors capitalize",
+                  "px-4 py-2.5 rounded-xl text-xs font-semibold transition-all capitalize",
                   sortBy === key
-                    ? "bg-primary/15 text-primary border border-primary/30"
-                    : "bg-secondary text-secondary-foreground border border-border/50 hover:bg-accent"
+                    ? "bg-primary/10 text-primary border border-primary/20"
+                    : "bg-white text-muted-foreground border border-border hover:bg-accent"
                 )}
               >
                 {key}
@@ -109,6 +120,7 @@ function AdminPage() {
           </div>
         </div>
 
+        {/* Client Cards */}
         <div className="space-y-3">
           {clients.map((client) => {
             const progress = Math.round(((client.startWeight - client.currentWeight) / (client.startWeight - client.goalWeight)) * 100);
@@ -118,17 +130,17 @@ function AdminPage() {
               <div
                 key={client.id}
                 className={cn(
-                  "glass-card rounded-xl p-5 hover:border-primary/30 transition-all cursor-pointer",
+                  "glass-card rounded-2xl p-5 card-hover cursor-pointer",
                   client.alert && "border-bio-danger/30"
                 )}
               >
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                   <div className="flex items-center gap-3 min-w-0 sm:w-56">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 shrink-0">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/8 shrink-0">
                       <User className="h-5 w-5 text-primary" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-foreground truncate">{client.name}</p>
+                      <p className="text-sm font-bold text-foreground truncate">{client.name}</p>
                       <p className="text-xs text-muted-foreground">{client.peptide} · {client.dose}</p>
                     </div>
                   </div>
@@ -148,14 +160,14 @@ function AdminPage() {
                     />
                   </div>
 
-                  <div className="sm:w-48 sm:text-right">
+                  <div className="sm:w-52 sm:text-right">
                     {client.alert ? (
-                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-bio-danger">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-bio-danger bg-bio-danger/8 px-3 py-1.5 rounded-full">
                         <AlertTriangle className="h-3 w-3" />
                         {client.alert}
                       </span>
                     ) : (
-                      <span className="text-xs text-muted-foreground">Last log: {client.lastLog}</span>
+                      <span className="text-xs text-muted-foreground font-medium">Last log: {client.lastLog}</span>
                     )}
                   </div>
                 </div>
@@ -168,10 +180,20 @@ function AdminPage() {
   );
 }
 
+function OverviewStat({ label, value, icon }: { label: string; value: string; icon: string }) {
+  return (
+    <div className="glass-card rounded-2xl p-4">
+      <div className="text-lg mb-1">{icon}</div>
+      <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-semibold">{label}</p>
+      <p className="text-xl font-extrabold text-foreground mt-0.5">{value}</p>
+    </div>
+  );
+}
+
 function MiniStat({ label, value, icon }: { label: string; value: string; icon?: React.ReactNode }) {
   return (
     <div>
-      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</p>
+      <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">{label}</p>
       <div className="flex items-center gap-1 mt-0.5">
         {icon}
         <span className="text-sm font-bold text-foreground">{value}</span>
