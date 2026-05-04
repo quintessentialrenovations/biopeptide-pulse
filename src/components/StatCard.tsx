@@ -8,15 +8,16 @@ interface StatCardProps {
   icon: LucideIcon;
   trend?: "up" | "down" | "neutral";
   glow?: boolean;
+  gradient?: string;
 }
 
-export function StatCard({ label, value, sub, icon: Icon, trend, glow }: StatCardProps) {
+export function StatCard({ label, value, sub, icon: Icon, trend, glow, gradient = "gradient-blue" }: StatCardProps) {
   return (
-    <div className={cn("glass-card rounded-xl p-5 transition-all hover:border-primary/30", glow && "pulse-glow")}>
+    <div className={cn("glass-card rounded-2xl p-5 card-hover", glow && "pulse-glow")}>
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{label}</p>
-          <p className="mt-1.5 text-2xl font-bold text-foreground">{value}</p>
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{label}</p>
+          <p className="mt-1.5 text-2xl font-extrabold text-foreground">{value}</p>
           {sub && (
             <p className={cn(
               "mt-1 text-xs font-medium",
@@ -26,8 +27,8 @@ export function StatCard({ label, value, sub, icon: Icon, trend, glow }: StatCar
             </p>
           )}
         </div>
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-          <Icon className="h-5 w-5 text-primary" />
+        <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl", gradient)}>
+          <Icon className="h-5 w-5 text-white" />
         </div>
       </div>
     </div>

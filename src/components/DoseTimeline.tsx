@@ -1,4 +1,4 @@
-import { Syringe, Calendar, Clock } from "lucide-react";
+import { Syringe, Clock, Check } from "lucide-react";
 
 const doses = [
   { week: 8, date: "Apr 28", dose: "7.5mg", units: "50u", status: "completed" as const },
@@ -12,42 +12,44 @@ const nextDose = { week: 9, date: "May 5", dose: "7.5mg", units: "50u", daysLeft
 
 export function DoseTimeline() {
   return (
-    <div className="glass-card rounded-xl p-5">
-      <h3 className="text-sm font-semibold text-foreground mb-4">Dose Timeline</h3>
+    <div className="glass-card rounded-2xl p-6">
+      <h3 className="text-base font-bold text-foreground mb-4">Dose Timeline</h3>
 
-      {/* Next Dose */}
-      <div className="mb-4 rounded-lg gradient-blue p-4 glow-blue">
+      {/* Next Dose — Countdown Card */}
+      <div className="mb-5 rounded-2xl gradient-blue p-5 text-white">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-primary-foreground/70 uppercase tracking-wider">Next Dose</p>
-            <p className="text-lg font-bold text-primary-foreground mt-0.5">{nextDose.dose} ({nextDose.units})</p>
+            <p className="text-xs font-semibold text-white/70 uppercase tracking-wider">Next Dose</p>
+            <p className="text-xl font-extrabold mt-1">{nextDose.dose} <span className="text-sm font-medium text-white/70">({nextDose.units})</span></p>
           </div>
           <div className="text-right">
-            <div className="flex items-center gap-1.5 text-primary-foreground/80">
-              <Clock className="h-3.5 w-3.5" />
-              <span className="text-xs font-medium">{nextDose.daysLeft} day left</span>
+            <div className="flex items-center gap-1.5 text-white/80">
+              <Clock className="h-4 w-4" />
+              <span className="text-sm font-semibold">{nextDose.daysLeft} day left</span>
             </div>
-            <p className="text-sm font-semibold text-primary-foreground mt-0.5">{nextDose.date}</p>
+            <p className="text-base font-bold mt-1">{nextDose.date}</p>
           </div>
         </div>
       </div>
 
       {/* Past Doses */}
-      <div className="space-y-1">
+      <div className="space-y-0.5">
         {doses.map((dose, i) => (
           <div key={dose.week} className="flex items-center gap-3 py-2.5">
             <div className="relative flex flex-col items-center">
-              <div className="h-2.5 w-2.5 rounded-full bg-primary/60" />
-              {i < doses.length - 1 && <div className="w-px h-6 bg-border/50 mt-1" />}
+              <div className="h-7 w-7 rounded-full bg-bio-success/10 flex items-center justify-center">
+                <Check className="h-3.5 w-3.5 text-bio-success" />
+              </div>
+              {i < doses.length - 1 && <div className="w-px h-5 bg-border mt-1" />}
             </div>
             <div className="flex-1 flex items-center justify-between">
               <div>
-                <span className="text-sm font-medium text-foreground">Week {dose.week}</span>
+                <span className="text-sm font-semibold text-foreground">Week {dose.week}</span>
                 <span className="text-xs text-muted-foreground ml-2">{dose.date}</span>
               </div>
               <div className="flex items-center gap-2">
-                <Syringe className="h-3.5 w-3.5 text-muted-foreground" />
-                <span className="text-sm font-medium text-foreground">{dose.dose}</span>
+                <Syringe className="h-3.5 w-3.5 text-primary" />
+                <span className="text-sm font-bold text-foreground">{dose.dose}</span>
               </div>
             </div>
           </div>
