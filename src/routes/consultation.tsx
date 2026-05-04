@@ -527,8 +527,8 @@ function ConsultationPage() {
                   isListening ? "border-destructive/30 bg-destructive/5 text-foreground" : "border-border bg-white text-foreground"
                 )}
               />
-              <Button variant="hero" onClick={() => handleSendChat()} className="h-12 w-12 rounded-2xl p-0" disabled={isListening}>
-                <Send className="h-4 w-4" />
+              <Button variant="hero" onClick={() => handleSendChat()} className="h-12 w-12 rounded-2xl p-0" disabled={isListening || isAiLoading}>
+                {isAiLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
               </Button>
             </div>
 
