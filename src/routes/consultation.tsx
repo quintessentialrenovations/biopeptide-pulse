@@ -1,15 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Navbar } from "@/components/Navbar";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Video, Mic, MicOff, ChevronRight, CheckCircle, AlertTriangle, FileText,
   Shield, Stethoscope, Heart, Brain, Pill, ClipboardList, Play, ArrowRight,
-  Send, User, Bot,
+  Send, User, Bot, Volume2, VolumeX, PhoneOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/i18n/context";
 import type { TranslationKey } from "@/i18n/translations";
+import { useSpeechSynthesis, useSpeechRecognition } from "@/hooks/useSpeech";
+import doctorAvatar from "@/assets/doctor-avatar.png";
 
 export const Route = createFileRoute("/consultation")({
   head: () => ({
@@ -70,8 +72,28 @@ function ConsultationPage() {
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
   const [messages, setMessages] = useState<Message[]>([]);
   const [chatInput, setChatInput] = useState("");
-  const [isMuted, setIsMuted] = useState(false);
   const [showRedFlag, setShowRedFlag] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  const { speak, stop: stopSpeaking, isSpeaking } = useSpeechSynthesis();
+  const { startListening, stopListening, isListening, transcript } = useSpeechRecognition();
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // Auto-speak new doctor messages
+  const lastSpokenRef = useRef(0);
+  useEffect(() => {
+    if (!voiceEnabled) return;
+    const doctorMessages = messages.filter((m) => m.role === "doctor");
+    if (doctorMessages.length > lastSpokenRef.current) {
+      const newest = doctorMessages[doctorMessages.length - 1];
+      speak(newest.text);
+      lastSpokenRef.current = doctorMessages.length;
+    }
+  }, [messages, voiceEnabled, speak]);
 
   const getDoctorMessages = (): Message[] => [
     { role: "doctor", text: t("chat.doctorMsg1") },
@@ -102,22 +124,48 @@ function ConsultationPage() {
       if (dangerItems.length > 0 && !selected.includes(noneKey)) { setShowRedFlag(true); return; }
     }
     if (currentStep < questionnaireSteps.length - 1) { setCurrentStep(currentStep + 1); setShowRedFlag(false); }
-    else { setPhase("chat"); setMessages([...getDoctorMessages()]); }
+    else {
+      lastSpokenRef.current = 0;
+      setPhase("chat");
+      setMessages([...getDoctorMessages()]);
+    }
   };
 
-  const handleSendChat = () => {
-    if (!chatInput.trim()) return;
-    setMessages((prev) => [...prev, { role: "user", text: chatInput }]);
+  const handleSendChat = (text?: string) => {
+    const msg = text || chatInput.trim();
+    if (!msg) return;
+    setMessages((prev) => [...prev, { role: "user", text: msg }]);
     setChatInput("");
     setTimeout(() => {
       setMessages((prev) => [...prev, { role: "doctor", text: t("chat.doctorReply") }]);
     }, 1500);
   };
 
+  const handleVoiceInput = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      stopSpeaking();
+      startListening((text) => {
+        handleSendChat(text);
+      });
+    }
+  };
+
   const advanceFromRedFlag = () => {
     setShowRedFlag(false);
     if (currentStep < questionnaireSteps.length - 1) setCurrentStep(currentStep + 1);
-    else { setPhase("chat"); setMessages([...getDoctorMessages()]); }
+    else {
+      lastSpokenRef.current = 0;
+      setPhase("chat");
+      setMessages([...getDoctorMessages()]);
+    }
+  };
+
+  const handleEndSession = () => {
+    stopSpeaking();
+    stopListening();
+    setPhase("summary");
   };
 
   return (
@@ -133,8 +181,8 @@ function ConsultationPage() {
 
         {phase === "intro" && (
           <div className="text-center py-8">
-            <div className="mx-auto mb-6 h-24 w-24 rounded-3xl gradient-blue flex items-center justify-center shadow-lg">
-              <Stethoscope className="h-12 w-12 text-white" />
+            <div className="mx-auto mb-6 h-28 w-28 rounded-full overflow-hidden shadow-lg ring-4 ring-primary/20">
+              <img src={doctorAvatar} alt="Doctor IA" width={512} height={512} className="h-full w-full object-cover" />
             </div>
             <h1 className="text-3xl font-extrabold text-foreground mb-3">{t("consult.meetDoctor")}</h1>
             <p className="text-muted-foreground max-w-lg mx-auto mb-8 leading-relaxed">{t("consult.meetDoctorDesc")}</p>
@@ -233,10 +281,11 @@ function ConsultationPage() {
 
         {phase === "chat" && (
           <div>
+            {/* Video call header */}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl gradient-blue flex items-center justify-center">
-                  <Stethoscope className="h-5 w-5 text-white" />
+                <div className="h-10 w-10 rounded-full overflow-hidden ring-2 ring-primary/30">
+                  <img src={doctorAvatar} alt="Doctor IA" width={40} height={40} className="h-full w-full object-cover" />
                 </div>
                 <div>
                   <h2 className="text-base font-bold text-foreground">{t("chat.drAiConsultation")}</h2>
@@ -246,56 +295,137 @@ function ConsultationPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button onClick={() => setIsMuted(!isMuted)}
-                  className={cn("p-2 rounded-xl transition-colors", isMuted ? "bg-destructive/10 text-destructive" : "bg-accent text-muted-foreground hover:text-foreground")}>
-                  {isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                <button onClick={() => { setVoiceEnabled(!voiceEnabled); if (voiceEnabled) stopSpeaking(); }}
+                  className={cn("p-2 rounded-xl transition-colors", !voiceEnabled ? "bg-destructive/10 text-destructive" : "bg-accent text-muted-foreground hover:text-foreground")}
+                  title={voiceEnabled ? "Silenciar voz" : "Activar voz"}>
+                  {voiceEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
                 </button>
-                <Button variant="outline" size="sm" onClick={() => setPhase("summary")} className="rounded-xl text-xs">
+                <Button variant="outline" size="sm" onClick={handleEndSession} className="rounded-xl text-xs gap-1">
+                  <PhoneOff className="h-3.5 w-3.5" />
                   {t("chat.endSession")}
                 </Button>
               </div>
             </div>
 
+            {/* Doctor avatar video area */}
             <div className="glass-card rounded-2xl overflow-hidden mb-4">
-              <div className="relative h-48 sm:h-56 gradient-blue flex items-center justify-center">
-                <div className="text-center text-white">
-                  <div className="h-20 w-20 rounded-full bg-white/20 backdrop-blur flex items-center justify-center mx-auto mb-3">
-                    <Stethoscope className="h-10 w-10" />
-                  </div>
-                  <p className="text-sm font-semibold">{t("chat.drAiBio")}</p>
-                  <p className="text-xs opacity-80">{t("chat.aiVideoAvatar")}</p>
+              <div className="relative bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 flex items-center justify-center"
+                style={{ minHeight: "280px" }}>
+                {/* Clinical background pattern */}
+                <div className="absolute inset-0 opacity-5">
+                  <div className="absolute inset-0" style={{
+                    backgroundImage: "radial-gradient(circle at 2px 2px, white 1px, transparent 0)",
+                    backgroundSize: "24px 24px"
+                  }} />
                 </div>
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <div key={i} className="w-1 rounded-full bg-white/60"
-                      style={{ height: `${12 + Math.sin(Date.now() / 300 + i) * 8}px`, animation: `pulse 1.${i}s ease-in-out infinite` }} />
-                  ))}
+
+                {/* Doctor avatar */}
+                <div className="relative z-10 flex flex-col items-center">
+                  <div className={cn(
+                    "h-36 w-36 sm:h-44 sm:w-44 rounded-full overflow-hidden ring-4 transition-all duration-300",
+                    isSpeaking
+                      ? "ring-bio-success shadow-[0_0_30px_rgba(34,197,94,0.4)] scale-105"
+                      : "ring-white/20 shadow-lg"
+                  )}>
+                    <img src={doctorAvatar} alt="Doctor IA BioPeptideX"
+                      width={512} height={512}
+                      className="h-full w-full object-cover" />
+                  </div>
+
+                  {/* Speaking indicator */}
+                  <div className="mt-4 flex items-center gap-2">
+                    {isSpeaking ? (
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-bio-success/20 backdrop-blur-sm">
+                        <div className="flex items-center gap-0.5">
+                          {[1, 2, 3, 4, 5].map((i) => (
+                            <div
+                              key={i}
+                              className="w-1 bg-bio-success rounded-full"
+                              style={{
+                                animation: `soundbar 0.${3 + i}s ease-in-out infinite alternate`,
+                                height: `${8 + Math.random() * 12}px`,
+                              }}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-xs font-medium text-bio-success ml-1">Hablando...</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm">
+                        <span className="h-2 w-2 rounded-full bg-bio-success animate-pulse" />
+                        <span className="text-xs font-medium text-white/70">Dr. IA BioPeptideX</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Decorative corners - video call feel */}
+                <div className="absolute top-3 left-3 w-6 h-6 border-t-2 border-l-2 border-white/20 rounded-tl-lg" />
+                <div className="absolute top-3 right-3 w-6 h-6 border-t-2 border-r-2 border-white/20 rounded-tr-lg" />
+                <div className="absolute bottom-3 left-3 w-6 h-6 border-b-2 border-l-2 border-white/20 rounded-bl-lg" />
+                <div className="absolute bottom-3 right-3 w-6 h-6 border-b-2 border-r-2 border-white/20 rounded-br-lg" />
+
+                {/* REC indicator */}
+                <div className="absolute top-4 right-4 flex items-center gap-1.5 px-2 py-1 rounded-md bg-destructive/80 backdrop-blur-sm">
+                  <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
+                  <span className="text-[10px] font-bold text-white tracking-wider">CONSULTA</span>
                 </div>
               </div>
             </div>
 
-            <div className="glass-card rounded-2xl p-4 mb-4 max-h-[360px] overflow-y-auto space-y-3">
+            {/* Chat messages */}
+            <div className="glass-card rounded-2xl p-4 mb-4 max-h-[300px] overflow-y-auto space-y-3">
               {messages.map((msg, i) => (
                 <div key={i} className={cn("flex gap-3", msg.role === "user" ? "flex-row-reverse" : "")}>
-                  <div className={cn("h-8 w-8 rounded-xl flex items-center justify-center shrink-0", msg.role === "doctor" ? "gradient-blue" : "gradient-green")}>
-                    {msg.role === "doctor" ? <Bot className="h-4 w-4 text-white" /> : <User className="h-4 w-4 text-white" />}
+                  <div className={cn("h-8 w-8 rounded-xl flex items-center justify-center shrink-0 overflow-hidden",
+                    msg.role === "doctor" ? "" : "gradient-green")}>
+                    {msg.role === "doctor"
+                      ? <img src={doctorAvatar} alt="" width={32} height={32} className="h-full w-full object-cover rounded-xl" />
+                      : <User className="h-4 w-4 text-white" />}
                   </div>
-                  <div className={cn("max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed", msg.role === "doctor" ? "bg-accent text-foreground" : "bg-primary text-white")}>
+                  <div className={cn("max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed",
+                    msg.role === "doctor" ? "bg-accent text-foreground" : "bg-primary text-white")}>
                     {msg.text}
                   </div>
                 </div>
               ))}
+              <div ref={chatEndRef} />
             </div>
 
+            {/* Input area with voice */}
             <div className="flex gap-2">
-              <input value={chatInput} onChange={(e) => setChatInput(e.target.value)}
+              <button
+                onClick={handleVoiceInput}
+                className={cn(
+                  "h-12 w-12 rounded-2xl flex items-center justify-center transition-all shrink-0",
+                  isListening
+                    ? "bg-destructive text-white animate-pulse shadow-lg shadow-destructive/30"
+                    : "bg-accent text-muted-foreground hover:text-foreground hover:bg-accent/80"
+                )}
+                title={isListening ? "Detener grabación" : "Hablar al doctor"}>
+                {isListening ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+              </button>
+              <input
+                value={isListening ? transcript : chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSendChat()}
-                placeholder={t("chat.askQuestion")}
-                className="flex-1 h-12 px-4 rounded-2xl border border-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
-              <Button variant="hero" onClick={handleSendChat} className="h-12 w-12 rounded-2xl p-0">
+                placeholder={isListening ? "Escuchando..." : t("chat.askQuestion")}
+                readOnly={isListening}
+                className={cn(
+                  "flex-1 h-12 px-4 rounded-2xl border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary",
+                  isListening ? "border-destructive/30 bg-destructive/5 text-foreground" : "border-border bg-white text-foreground"
+                )}
+              />
+              <Button variant="hero" onClick={() => handleSendChat()} className="h-12 w-12 rounded-2xl p-0" disabled={isListening}>
                 <Send className="h-4 w-4" />
               </Button>
             </div>
+
+            {isListening && (
+              <p className="text-center text-xs text-destructive mt-2 animate-pulse">
+                🎤 Habla ahora... el doctor te escucha
+              </p>
+            )}
           </div>
         )}
 
@@ -330,13 +460,21 @@ function ConsultationPage() {
                 <FileText className="h-4 w-4 mr-2" />
                 {t("summary.downloadPdf")}
               </Button>
-              <Button variant="outline" size="lg" className="rounded-2xl" onClick={() => { setPhase("intro"); setCurrentStep(0); setSelections({}); setFieldValues({}); setMessages([]); }}>
+              <Button variant="outline" size="lg" className="rounded-2xl" onClick={() => { setPhase("intro"); setCurrentStep(0); setSelections({}); setFieldValues({}); setMessages([]); lastSpokenRef.current = 0; }}>
                 {t("summary.startNew")}
               </Button>
             </div>
           </div>
         )}
       </main>
+
+      {/* Soundbar animation keyframes */}
+      <style>{`
+        @keyframes soundbar {
+          0% { height: 4px; }
+          100% { height: 18px; }
+        }
+      `}</style>
     </div>
   );
 }
