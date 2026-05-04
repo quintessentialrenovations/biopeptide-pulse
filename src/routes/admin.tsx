@@ -8,6 +8,8 @@ import {
   Search,
   User,
   TrendingDown,
+  Stethoscope,
+  Video,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
