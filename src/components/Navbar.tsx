@@ -1,13 +1,14 @@
-import { Link, useLocation } from "@tanstack/react-router";
-import { Activity, Menu, X, Globe } from "lucide-react";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
+import { Activity, Menu, X, LogOut, LogIn } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/i18n/context";
+import { useAuth } from "@/hooks/useAuth";
 import type { TranslationKey } from "@/i18n/translations";
 
-const navLinks: { to: "/" | "/dashboard" | "/consultation" | "/protocols" | "/admin"; labelKey: TranslationKey }[] = [
+const navLinks: { to: "/" | "/dashboard" | "/consultation" | "/protocols" | "/admin"; labelKey: TranslationKey; authRequired?: boolean }[] = [
   { to: "/", labelKey: "nav.home" },
-  { to: "/dashboard", labelKey: "nav.dashboard" },
+  { to: "/dashboard", labelKey: "nav.dashboard", authRequired: true },
   { to: "/consultation", labelKey: "nav.aiDoctor" },
   { to: "/protocols", labelKey: "nav.protocols" },
   { to: "/admin", labelKey: "nav.admin" },
@@ -16,7 +17,16 @@ const navLinks: { to: "/" | "/dashboard" | "/consultation" | "/protocols" | "/ad
 export function Navbar() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { locale, setLocale, t } = useI18n();
+  const { user, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate({ to: "/" });
+  };
+
+  const visibleLinks = navLinks.filter((l) => !l.authRequired || user);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-border/60">
@@ -32,7 +42,7 @@ export function Navbar() {
           </Link>
 
           <div className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => (
+            {visibleLinks.map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
@@ -72,10 +82,26 @@ export function Navbar() {
                 ES
               </button>
             </div>
+
+            {/* Auth button */}
+            {user ? (
+              <button
+                onClick={handleSignOut}
+                className="ml-2 px-3 py-2 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-all flex items-center gap-1.5"
+              >
+                <LogOut className="h-3.5 w-3.5" /> Sign Out
+              </button>
+            ) : (
+              <Link
+                to="/login"
+                className="ml-2 px-4 py-2 rounded-xl text-sm font-semibold gradient-blue text-white transition-all"
+              >
+                Sign In
+              </Link>
+            )}
           </div>
 
           <div className="flex md:hidden items-center gap-2">
-            {/* Mobile language toggle */}
             <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-accent border border-border">
               <button
                 onClick={() => setLocale("en")}
@@ -109,7 +135,7 @@ export function Navbar() {
       {open && (
         <div className="md:hidden border-t border-border/50 bg-white/95 backdrop-blur-xl">
           <div className="px-4 py-3 space-y-1">
-            {navLinks.map((link) => (
+            {visibleLinks.map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
@@ -124,6 +150,22 @@ export function Navbar() {
                 {t(link.labelKey)}
               </Link>
             ))}
+            {user ? (
+              <button
+                onClick={() => { handleSignOut(); setOpen(false); }}
+                className="block w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent"
+              >
+                Sign Out
+              </button>
+            ) : (
+              <Link
+                to="/login"
+                onClick={() => setOpen(false)}
+                className="block px-4 py-2.5 rounded-xl text-sm font-semibold text-primary"
+              >
+                Sign In
+              </Link>
+            )}
           </div>
         </div>
       )}

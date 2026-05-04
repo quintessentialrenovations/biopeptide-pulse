@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Navbar } from "@/components/Navbar";
 import { StatCard } from "@/components/StatCard";
 import { WeightChart } from "@/components/WeightChart";
@@ -7,8 +7,11 @@ import { SideEffectsPanel } from "@/components/SideEffectsPanel";
 import { InjectionSiteTracker } from "@/components/InjectionSiteTracker";
 import { MedicationLevelChart } from "@/components/MedicationLevelChart";
 import { Button } from "@/components/ui/button";
-import { Scale, Target, TrendingDown, Syringe, Flame, Zap, Heart, Clock, Stethoscope, ArrowRight } from "lucide-react";
+import { Scale, Target, TrendingDown, Syringe, Heart, Clock, Stethoscope, ArrowRight, User } from "lucide-react";
 import { useI18n } from "@/i18n/context";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -20,24 +23,87 @@ export const Route = createFileRoute("/dashboard")({
   component: DashboardPage,
 });
 
+interface Profile {
+  full_name: string | null;
+  age: number | null;
+  height_cm: number | null;
+  starting_weight: number | null;
+  current_weight: number | null;
+  goal_weight: number | null;
+  peptide_type: string | null;
+  start_date: string | null;
+  onboarding_complete: boolean | null;
+}
+
 function DashboardPage() {
   const { t } = useI18n();
-  const progressPercent = Math.round(((105 - 96.5) / (105 - 85)) * 100);
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profileLoading, setProfileLoading] = useState(true);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate({ to: "/login" });
+      return;
+    }
+    if (user) {
+      supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single()
+        .then(({ data }) => {
+          if (data && !data.onboarding_complete) {
+            navigate({ to: "/onboarding" });
+            return;
+          }
+          setProfile(data as Profile | null);
+          setProfileLoading(false);
+        });
+    }
+  }, [user, authLoading, navigate]);
+
+  if (authLoading || profileLoading || !user) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-pulse text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
+
+  const startW = profile?.starting_weight ?? 105;
+  const currentW = profile?.current_weight ?? startW;
+  const goalW = profile?.goal_weight ?? 85;
+  const totalToLose = startW - goalW;
+  const lost = startW - currentW;
+  const progressPercent = totalToLose > 0 ? Math.min(100, Math.round((lost / totalToLose) * 100)) : 0;
+  const firstName = profile?.full_name?.split(" ")[0] ?? "there";
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <main className="pt-20 pb-12 px-4 mx-auto max-w-7xl">
-        <div className="mb-8">
-          <h1 className="text-2xl font-extrabold text-foreground">{t("dash.welcomeBack")}</h1>
-          <p className="text-sm text-muted-foreground mt-1">{t("dash.protocol")}</p>
+        {/* Profile Summary */}
+        <div className="glass-card rounded-2xl p-5 mb-6 flex items-center gap-4">
+          <div className="h-12 w-12 rounded-2xl gradient-blue flex items-center justify-center shrink-0">
+            <User className="h-6 w-6 text-white" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl font-extrabold text-foreground truncate">
+              Welcome back, {firstName}! 👋
+            </h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              {profile?.peptide_type ?? "Tirzepatide"} Protocol · Started {profile?.start_date ?? "N/A"}
+            </p>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <StatCard icon={Scale} label={t("dash.currentWeight")} value="96.5 kg" sub="-8.5 kg total" trend="down" gradient="gradient-blue" />
-          <StatCard icon={Target} label={t("dash.goalProgress")} value={`${progressPercent}%`} sub={`${t("dash.target")} 85 kg`} glow gradient="gradient-green" />
+          <StatCard icon={Scale} label={t("dash.currentWeight")} value={`${currentW} kg`} sub={`-${lost.toFixed(1)} kg total`} trend="down" gradient="gradient-blue" />
+          <StatCard icon={Target} label={t("dash.goalProgress")} value={`${progressPercent}%`} sub={`${t("dash.target")} ${goalW} kg`} glow gradient="gradient-green" />
           <StatCard icon={TrendingDown} label={t("dash.thisWeek")} value="-1.5 kg" sub={t("dash.onTrack")} trend="down" gradient="gradient-purple" />
-          <StatCard icon={Syringe} label={t("dash.currentDose")} value="7.5 mg" sub={t("dash.weekProtocol")} gradient="gradient-warm" />
+          <StatCard icon={Syringe} label={t("dash.currentDose")} value="2.5 mg" sub={t("dash.weekProtocol")} gradient="gradient-warm" />
         </div>
 
         <div className="glass-card rounded-2xl p-5 mb-6">
@@ -49,9 +115,9 @@ function DashboardPage() {
             <div className="h-full rounded-full gradient-blue transition-all duration-1000" style={{ width: `${progressPercent}%` }} />
           </div>
           <div className="flex justify-between mt-2.5 text-xs text-muted-foreground font-medium">
-            <span>{t("dash.start")} 105 kg</span>
-            <span>{t("dash.current")} 96.5 kg</span>
-            <span>{t("dash.goal")} 85 kg</span>
+            <span>{t("dash.start")} {startW} kg</span>
+            <span>{t("dash.current")} {currentW} kg</span>
+            <span>{t("dash.goal")} {goalW} kg</span>
           </div>
         </div>
 
