@@ -65,6 +65,8 @@ const questionnaireSteps: QStep[] = [
   },
 ];
 
+const AI_DOCTOR_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-doctor`;
+
 function ConsultationPage() {
   const { t } = useI18n();
   const [phase, setPhase] = useState<Phase>("intro");
@@ -75,6 +77,7 @@ function ConsultationPage() {
   const [chatInput, setChatInput] = useState("");
   const [showRedFlag, setShowRedFlag] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const [isAiLoading, setIsAiLoading] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const { speak, stop: stopSpeaking, isSpeaking } = useSpeechSynthesis();
@@ -84,23 +87,113 @@ function ConsultationPage() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Auto-speak new doctor messages
+  // Auto-speak completed doctor messages
   const lastSpokenRef = useRef(0);
+  const prevLoadingRef = useRef(false);
   useEffect(() => {
-    if (!voiceEnabled) return;
-    const doctorMessages = messages.filter((m) => m.role === "doctor");
-    if (doctorMessages.length > lastSpokenRef.current) {
-      const newest = doctorMessages[doctorMessages.length - 1];
-      speak(newest.text);
-      lastSpokenRef.current = doctorMessages.length;
+    // Only speak when loading finishes (streaming complete)
+    if (prevLoadingRef.current && !isAiLoading && voiceEnabled) {
+      const doctorMessages = messages.filter((m) => m.role === "doctor");
+      if (doctorMessages.length > lastSpokenRef.current) {
+        const newest = doctorMessages[doctorMessages.length - 1];
+        speak(newest.text);
+        lastSpokenRef.current = doctorMessages.length;
+      }
     }
-  }, [messages, voiceEnabled, speak]);
+    prevLoadingRef.current = isAiLoading;
+  }, [isAiLoading, messages, voiceEnabled, speak]);
 
-  const getDoctorMessages = (): Message[] => [
-    { role: "doctor", text: t("chat.doctorMsg1") },
-    { role: "doctor", text: t("chat.doctorMsg2") },
-    { role: "doctor", text: t("chat.doctorMsg3") },
-  ];
+  const buildPatientContext = useCallback(() => {
+    return {
+      goals: selections["goals"] || [],
+      currentWeight: fieldValues["q.currentWeight"] || undefined,
+      goalWeight: fieldValues["q.goalWeight"] || undefined,
+      height: fieldValues["q.height"] || undefined,
+      medicalHistory: selections["history"] || [],
+      experience: (selections["experience"] || [])[0] || undefined,
+    };
+  }, [selections, fieldValues]);
+
+  const streamAiResponse = useCallback(async (chatMessages: Message[]) => {
+    setIsAiLoading(true);
+    const apiMessages = chatMessages.map((m) => ({
+      role: m.role === "doctor" ? "assistant" : "user",
+      content: m.text,
+    }));
+
+    try {
+      const resp = await fetch(AI_DOCTOR_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ messages: apiMessages, patientContext: buildPatientContext() }),
+      });
+
+      if (!resp.ok || !resp.body) {
+        const err = await resp.json().catch(() => ({ error: "Error de conexión" }));
+        setMessages((prev) => [...prev, { role: "doctor", text: `⚠️ ${err.error || "Error al conectar con el Doctor IA. Intenta de nuevo."}` }]);
+        setIsAiLoading(false);
+        return;
+      }
+
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let textBuffer = "";
+      let assistantSoFar = "";
+
+      const upsertAssistant = (content: string) => {
+        assistantSoFar = content;
+        setMessages((prev) => {
+          const last = prev[prev.length - 1];
+          if (last?.role === "doctor" && last === prev[prev.length - 1] && assistantSoFar.startsWith("")) {
+            return prev.map((m, i) => (i === prev.length - 1 ? { ...m, text: assistantSoFar } : m));
+          }
+          if (prev.length > 0 && prev[prev.length - 1].role === "doctor" && prev[prev.length - 1].text === "") {
+            return prev.map((m, i) => (i === prev.length - 1 ? { ...m, text: assistantSoFar } : m));
+          }
+          return prev;
+        });
+      };
+
+      // Add empty doctor message placeholder
+      setMessages((prev) => [...prev, { role: "doctor", text: "" }]);
+
+      let streamDone = false;
+      while (!streamDone) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        textBuffer += decoder.decode(value, { stream: true });
+
+        let newlineIndex: number;
+        while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+          let line = textBuffer.slice(0, newlineIndex);
+          textBuffer = textBuffer.slice(newlineIndex + 1);
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+          if (line.startsWith(":") || line.trim() === "") continue;
+          if (!line.startsWith("data: ")) continue;
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === "[DONE]") { streamDone = true; break; }
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const delta = parsed.choices?.[0]?.delta?.content as string | undefined;
+            if (delta) {
+              assistantSoFar += delta;
+              upsertAssistant(assistantSoFar);
+            }
+          } catch {
+            textBuffer = line + "\n" + textBuffer;
+            break;
+          }
+        }
+      }
+    } catch (e) {
+      console.error("AI Doctor stream error:", e);
+      setMessages((prev) => [...prev, { role: "doctor", text: "⚠️ Error de conexión. Por favor intenta de nuevo." }]);
+    }
+    setIsAiLoading(false);
+  }, [buildPatientContext]);
 
   const toggleSelection = (stepId: string, option: string, multi: boolean) => {
     setSelections((prev) => {
@@ -128,18 +221,22 @@ function ConsultationPage() {
     else {
       lastSpokenRef.current = 0;
       setPhase("chat");
-      setMessages([...getDoctorMessages()]);
+      // Send initial greeting via AI
+      const initialMsg: Message = { role: "user", text: "Hola Doctor, acabo de completar el cuestionario. Estoy listo para mi consulta." };
+      const initialMessages = [initialMsg];
+      setMessages([initialMsg]);
+      streamAiResponse(initialMessages);
     }
   };
 
   const handleSendChat = (text?: string) => {
     const msg = text || chatInput.trim();
-    if (!msg) return;
-    setMessages((prev) => [...prev, { role: "user", text: msg }]);
+    if (!msg || isAiLoading) return;
+    const userMsg: Message = { role: "user", text: msg };
+    const newMessages = [...messages, userMsg];
+    setMessages(newMessages);
     setChatInput("");
-    setTimeout(() => {
-      setMessages((prev) => [...prev, { role: "doctor", text: t("chat.doctorReply") }]);
-    }, 1500);
+    streamAiResponse(newMessages);
   };
 
   const handleVoiceInput = () => {
