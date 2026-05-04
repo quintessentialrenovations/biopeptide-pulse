@@ -18,6 +18,8 @@ export const Route = createFileRoute("/login")({
   component: LoginPage,
 });
 
+const ADMIN_EMAIL = "rolando.aponte13@gmail.com";
+
 function LoginPage() {
   const { t } = useI18n();
   const { user } = useAuth();
@@ -30,6 +32,8 @@ function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [confirmationSent, setConfirmationSent] = useState(false);
+
+  const isAdminEmail = email.trim().toLowerCase() === ADMIN_EMAIL;
 
   // Redirect if already logged in
   if (user) {
