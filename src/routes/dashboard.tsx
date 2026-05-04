@@ -5,7 +5,6 @@ import { WeightChart } from "@/components/WeightChart";
 import { DoseTimeline } from "@/components/DoseTimeline";
 import { SideEffectsPanel } from "@/components/SideEffectsPanel";
 import { Scale, Target, TrendingDown, Syringe, Flame, Zap } from "lucide-react";
-import { motion } from "framer-motion";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
@@ -24,7 +23,6 @@ function DashboardPage() {
     <div className="min-h-screen bg-background">
       <Navbar />
       <main className="pt-20 pb-12 px-4 mx-auto max-w-7xl">
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-foreground">Client Dashboard</h1>
           <p className="text-sm text-muted-foreground mt-1">
@@ -33,35 +31,23 @@ function DashboardPage() {
         </div>
 
         {/* Stats Grid */}
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6"
-        >
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <StatCard icon={Scale} label="Current Weight" value="96.5 kg" sub="-8.5 kg total" trend="down" />
           <StatCard icon={Target} label="Goal Progress" value={`${progressPercent}%`} sub="Target: 85 kg" glow />
           <StatCard icon={TrendingDown} label="This Week" value="-1.5 kg" sub="On track" trend="down" />
           <StatCard icon={Syringe} label="Current Dose" value="7.5 mg" sub="Week 5–8 protocol" />
-        </motion.div>
+        </div>
 
         {/* Progress Bar */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="glass-card rounded-xl p-5 mb-6"
-        >
+        <div className="glass-card rounded-xl p-5 mb-6">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-medium text-muted-foreground">Progress to Goal</span>
             <span className="text-xs font-bold text-primary">{progressPercent}%</span>
           </div>
           <div className="h-2.5 rounded-full bg-muted overflow-hidden">
-            <motion.div
-              className="h-full rounded-full gradient-blue"
-              initial={{ width: 0 }}
-              animate={{ width: `${progressPercent}%` }}
-              transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
+            <div
+              className="h-full rounded-full gradient-blue transition-all duration-1000"
+              style={{ width: `${progressPercent}%` }}
             />
           </div>
           <div className="flex justify-between mt-2 text-[11px] text-muted-foreground">
@@ -69,14 +55,13 @@ function DashboardPage() {
             <span>Current: 96.5 kg</span>
             <span>Goal: 85 kg</span>
           </div>
-        </motion.div>
+        </div>
 
         {/* Main Grid */}
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <WeightChart />
 
-            {/* Weekly Log Summary */}
             <div className="glass-card rounded-xl p-5">
               <h3 className="text-sm font-semibold text-foreground mb-4">This Week's Log</h3>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

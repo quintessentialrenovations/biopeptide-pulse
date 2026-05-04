@@ -1,10 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Navbar } from "@/components/Navbar";
-import { motion } from "framer-motion";
 import {
   AlertTriangle,
   ArrowDown,
-  ArrowUp,
   CheckCircle,
   Clock,
   Search,
@@ -38,68 +36,11 @@ interface Client {
 }
 
 const mockClients: Client[] = [
-  {
-    id: "1",
-    name: "Sarah Mitchell",
-    peptide: "Tirzepatide",
-    dose: "7.5mg",
-    week: 8,
-    startWeight: 105,
-    currentWeight: 96.5,
-    goalWeight: 85,
-    compliance: 96,
-    lastLog: "Today",
-  },
-  {
-    id: "2",
-    name: "James Rivera",
-    peptide: "Retatrutide",
-    dose: "2mg",
-    week: 4,
-    startWeight: 120,
-    currentWeight: 115,
-    goalWeight: 95,
-    compliance: 88,
-    lastLog: "Yesterday",
-    alert: "Severe nausea reported",
-  },
-  {
-    id: "3",
-    name: "Emily Chen",
-    peptide: "Tirzepatide",
-    dose: "10mg",
-    week: 12,
-    startWeight: 92,
-    currentWeight: 80,
-    goalWeight: 72,
-    compliance: 100,
-    lastLog: "2 days ago",
-  },
-  {
-    id: "4",
-    name: "David Okafor",
-    peptide: "Tirzepatide",
-    dose: "5mg",
-    week: 3,
-    startWeight: 110,
-    currentWeight: 108,
-    goalWeight: 88,
-    compliance: 67,
-    lastLog: "5 days ago",
-    alert: "Missed last 2 doses",
-  },
-  {
-    id: "5",
-    name: "Laura Kim",
-    peptide: "Retatrutide",
-    dose: "1mg",
-    week: 2,
-    startWeight: 88,
-    currentWeight: 86.5,
-    goalWeight: 70,
-    compliance: 100,
-    lastLog: "Today",
-  },
+  { id: "1", name: "Sarah Mitchell", peptide: "Tirzepatide", dose: "7.5mg", week: 8, startWeight: 105, currentWeight: 96.5, goalWeight: 85, compliance: 96, lastLog: "Today" },
+  { id: "2", name: "James Rivera", peptide: "Retatrutide", dose: "2mg", week: 4, startWeight: 120, currentWeight: 115, goalWeight: 95, compliance: 88, lastLog: "Yesterday", alert: "Severe nausea reported" },
+  { id: "3", name: "Emily Chen", peptide: "Tirzepatide", dose: "10mg", week: 12, startWeight: 92, currentWeight: 80, goalWeight: 72, compliance: 100, lastLog: "2 days ago" },
+  { id: "4", name: "David Okafor", peptide: "Tirzepatide", dose: "5mg", week: 3, startWeight: 110, currentWeight: 108, goalWeight: 88, compliance: 67, lastLog: "5 days ago", alert: "Missed last 2 doses" },
+  { id: "5", name: "Laura Kim", peptide: "Retatrutide", dose: "1mg", week: 2, startWeight: 88, currentWeight: 86.5, goalWeight: 70, compliance: 100, lastLog: "Today" },
 ];
 
 function AdminPage() {
@@ -131,16 +72,14 @@ function AdminPage() {
               {mockClients.length} active clients · {alertCount} alert{alertCount !== 1 && "s"}
             </p>
           </div>
-
           {alertCount > 0 && (
             <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-bio-danger/10 border border-bio-danger/20">
               <AlertTriangle className="h-4 w-4 text-bio-danger" />
-              <span className="text-sm font-medium text-bio-danger">{alertCount} client{alertCount !== 1 && "s"} need attention</span>
+              <span className="text-sm font-medium text-bio-danger">{alertCount} clients need attention</span>
             </div>
           )}
         </div>
 
-        {/* Controls */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -170,90 +109,66 @@ function AdminPage() {
           </div>
         </div>
 
-        {/* Client Cards */}
         <div className="space-y-3">
-          {clients.map((client, i) => (
-            <ClientRow key={client.id} client={client} index={i} />
-          ))}
+          {clients.map((client) => {
+            const progress = Math.round(((client.startWeight - client.currentWeight) / (client.startWeight - client.goalWeight)) * 100);
+            const weightLost = (client.startWeight - client.currentWeight).toFixed(1);
+
+            return (
+              <div
+                key={client.id}
+                className={cn(
+                  "glass-card rounded-xl p-5 hover:border-primary/30 transition-all cursor-pointer",
+                  client.alert && "border-bio-danger/30"
+                )}
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                  <div className="flex items-center gap-3 min-w-0 sm:w-56">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 shrink-0">
+                      <User className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-foreground truncate">{client.name}</p>
+                      <p className="text-xs text-muted-foreground">{client.peptide} · {client.dose}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                    <MiniStat label="Week" value={String(client.week)} />
+                    <MiniStat label="Lost" value={`${weightLost} kg`} icon={<ArrowDown className="h-3 w-3 text-bio-success" />} />
+                    <MiniStat label="Progress" value={`${progress}%`} />
+                    <MiniStat
+                      label="Compliance"
+                      value={`${client.compliance}%`}
+                      icon={
+                        client.compliance >= 90 ? <CheckCircle className="h-3 w-3 text-bio-success" /> :
+                        client.compliance >= 70 ? <Clock className="h-3 w-3 text-bio-warning" /> :
+                        <AlertTriangle className="h-3 w-3 text-bio-danger" />
+                      }
+                    />
+                  </div>
+
+                  <div className="sm:w-48 sm:text-right">
+                    {client.alert ? (
+                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-bio-danger">
+                        <AlertTriangle className="h-3 w-3" />
+                        {client.alert}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">Last log: {client.lastLog}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </main>
     </div>
   );
 }
 
-function ClientRow({ client, index }: { client: Client; index: number }) {
-  const progress = Math.round(
-    ((client.startWeight - client.currentWeight) / (client.startWeight - client.goalWeight)) * 100
-  );
-  const weightLost = (client.startWeight - client.currentWeight).toFixed(1);
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05 }}
-      className={cn(
-        "glass-card rounded-xl p-5 hover:border-primary/30 transition-all cursor-pointer",
-        client.alert && "border-bio-danger/30"
-      )}
-    >
-      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-        {/* Avatar + Info */}
-        <div className="flex items-center gap-3 min-w-0 sm:w-56">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 shrink-0">
-            <User className="h-5 w-5 text-primary" />
-          </div>
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-foreground truncate">{client.name}</p>
-            <p className="text-xs text-muted-foreground">{client.peptide} · {client.dose}</p>
-          </div>
-        </div>
-
-        {/* Stats */}
-        <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-          <MiniStat label="Week" value={String(client.week)} />
-          <MiniStat label="Lost" value={`${weightLost} kg`} icon={<ArrowDown className="h-3 w-3 text-bio-success" />} />
-          <MiniStat label="Progress" value={`${progress}%`} />
-          <MiniStat
-            label="Compliance"
-            value={`${client.compliance}%`}
-            icon={
-              client.compliance >= 90 ? (
-                <CheckCircle className="h-3 w-3 text-bio-success" />
-              ) : client.compliance >= 70 ? (
-                <Clock className="h-3 w-3 text-bio-warning" />
-              ) : (
-                <AlertTriangle className="h-3 w-3 text-bio-danger" />
-              )
-            }
-          />
-        </div>
-
-        {/* Alert */}
-        <div className="sm:w-48 sm:text-right">
-          {client.alert ? (
-            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-bio-danger">
-              <AlertTriangle className="h-3 w-3" />
-              {client.alert}
-            </span>
-          ) : (
-            <span className="text-xs text-muted-foreground">Last log: {client.lastLog}</span>
-          )}
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-function MiniStat({
-  label,
-  value,
-  icon,
-}: {
-  label: string;
-  value: string;
-  icon?: React.ReactNode;
-}) {
+function MiniStat({ label, value, icon }: { label: string; value: string; icon?: React.ReactNode }) {
   return (
     <div>
       <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</p>

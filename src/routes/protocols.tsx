@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Navbar } from "@/components/Navbar";
 import { ProtocolCard } from "@/components/ProtocolCard";
-import { motion } from "framer-motion";
 import { Clock, ArrowDown, Flame, Brain } from "lucide-react";
 
 export const Route = createFileRoute("/protocols")({
@@ -59,20 +58,13 @@ function ProtocolsPage() {
           </p>
         </div>
 
-        {/* Protocol Cards */}
         <div className="grid md:grid-cols-2 gap-5 mb-12">
           {protocols.map((p) => (
             <ProtocolCard key={p.name} {...p} />
           ))}
         </div>
 
-        {/* Tirzepatide Dose Schedule */}
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="glass-card rounded-xl p-6 mb-12"
-        >
+        <div className="glass-card rounded-xl p-6 mb-12">
           <h2 className="text-base font-bold text-foreground mb-4">Tirzepatide Dose Escalation</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -94,21 +86,13 @@ function ProtocolsPage() {
               </tbody>
             </table>
           </div>
-        </motion.div>
+        </div>
 
-        {/* Post-Injection Timeline */}
         <div className="mb-8">
           <h2 className="text-base font-bold text-foreground mb-5">Post-Injection Timeline</h2>
           <div className="space-y-4">
             {timeline.map((item, i) => (
-              <motion.div
-                key={item.period}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.08 }}
-                className="flex items-start gap-4"
-              >
+              <div key={item.period} className="flex items-start gap-4">
                 <div className="relative flex flex-col items-center">
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 shrink-0">
                     <item.icon className="h-4 w-4 text-primary" />
@@ -119,7 +103,7 @@ function ProtocolsPage() {
                   <h3 className="text-sm font-semibold text-foreground">{item.period}</h3>
                   <p className="text-sm text-muted-foreground mt-0.5 leading-relaxed">{item.desc}</p>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
