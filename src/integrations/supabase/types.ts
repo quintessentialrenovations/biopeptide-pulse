@@ -14,7 +14,93 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          age: number | null
+          created_at: string | null
+          current_weight: number | null
+          full_name: string | null
+          goal_weight: number | null
+          height_cm: number | null
+          id: string
+          onboarding_complete: boolean | null
+          peptide_type: string | null
+          start_date: string | null
+          starting_weight: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          age?: number | null
+          created_at?: string | null
+          current_weight?: number | null
+          full_name?: string | null
+          goal_weight?: number | null
+          height_cm?: number | null
+          id: string
+          onboarding_complete?: boolean | null
+          peptide_type?: string | null
+          start_date?: string | null
+          starting_weight?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          age?: number | null
+          created_at?: string | null
+          current_weight?: number | null
+          full_name?: string | null
+          goal_weight?: number | null
+          height_cm?: number | null
+          id?: string
+          onboarding_complete?: boolean | null
+          peptide_type?: string | null
+          start_date?: string | null
+          starting_weight?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      weekly_tracking: {
+        Row: {
+          created_at: string | null
+          dose_mg: number | null
+          energy_level: number | null
+          hunger_level: number | null
+          id: string
+          logged_at: string | null
+          notes: string | null
+          side_effects: string[] | null
+          user_id: string
+          week_number: number
+          weight: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          dose_mg?: number | null
+          energy_level?: number | null
+          hunger_level?: number | null
+          id?: string
+          logged_at?: string | null
+          notes?: string | null
+          side_effects?: string[] | null
+          user_id: string
+          week_number: number
+          weight?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          dose_mg?: number | null
+          energy_level?: number | null
+          hunger_level?: number | null
+          id?: string
+          logged_at?: string | null
+          notes?: string | null
+          side_effects?: string[] | null
+          user_id?: string
+          week_number?: number
+          weight?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
