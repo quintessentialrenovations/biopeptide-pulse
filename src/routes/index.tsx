@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { motion } from "framer-motion";
 import { Activity, ArrowRight, BarChart3, Shield, Syringe, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/Navbar";
@@ -37,15 +36,6 @@ const features = [
   },
 ];
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.1, duration: 0.5, ease: "easeOut" as const },
-  }),
-};
-
 function HomePage() {
   return (
     <div className="min-h-screen bg-background">
@@ -57,43 +47,22 @@ function HomePage() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/5 blur-3xl" />
 
         <div className="relative mx-auto max-w-4xl text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/5 mb-6">
-              <Activity className="h-3.5 w-3.5 text-primary" />
-              <span className="text-xs font-medium text-primary">Peptide Protocol Management</span>
-            </div>
-          </motion.div>
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 bg-primary/5 mb-6">
+            <Activity className="h-3.5 w-3.5 text-primary" />
+            <span className="text-xs font-medium text-primary">Peptide Protocol Management</span>
+          </div>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-4xl sm:text-6xl font-bold tracking-tight"
-          >
+          <h1 className="text-4xl sm:text-6xl font-bold tracking-tight">
             Track Client Results{" "}
             <span className="text-gradient-blue">With Precision</span>
-          </motion.h1>
+          </h1>
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="mt-5 text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed"
-          >
+          <p className="mt-5 text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             Professional-grade tracking for Tirzepatide, Retatrutide, and performance peptides.
             Monitor progress, optimize protocols, and maximize outcomes.
-          </motion.p>
+          </p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3"
-          >
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Button variant="hero" size="lg" asChild>
               <Link to="/dashboard">
                 Open Dashboard <ArrowRight className="h-4 w-4" />
@@ -102,7 +71,7 @@ function HomePage() {
             <Button variant="glass" size="lg" asChild>
               <Link to="/protocols">View Protocols</Link>
             </Button>
-          </motion.div>
+          </div>
         </div>
       </section>
 
@@ -110,14 +79,9 @@ function HomePage() {
       <section className="py-20 px-4">
         <div className="mx-auto max-w-5xl">
           <div className="grid sm:grid-cols-2 gap-5">
-            {features.map((f, i) => (
-              <motion.div
+            {features.map((f) => (
+              <div
                 key={f.title}
-                custom={i}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, margin: "-50px" }}
-                variants={fadeUp}
                 className="glass-card rounded-xl p-6 hover:border-primary/30 transition-colors"
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 mb-4">
@@ -125,7 +89,7 @@ function HomePage() {
                 </div>
                 <h3 className="text-base font-semibold text-foreground">{f.title}</h3>
                 <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>

@@ -1,5 +1,4 @@
-import { ChevronRight, Pill } from "lucide-react";
-import { motion } from "framer-motion";
+import { Pill } from "lucide-react";
 
 interface ProtocolCardProps {
   name: string;
@@ -11,11 +10,7 @@ interface ProtocolCardProps {
 
 export function ProtocolCard({ name, mechanism, startingDose, targets, color }: ProtocolCardProps) {
   return (
-    <motion.div
-      whileHover={{ y: -4, scale: 1.01 }}
-      transition={{ type: "spring", stiffness: 400, damping: 25 }}
-      className="glass-card rounded-xl p-6 cursor-pointer group"
-    >
+    <div className="glass-card rounded-xl p-6 cursor-pointer group hover:border-primary/30 transition-all">
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-lg" style={{ background: `${color}20` }}>
@@ -26,7 +21,6 @@ export function ProtocolCard({ name, mechanism, startingDose, targets, color }: 
             <p className="text-xs text-muted-foreground">Starting: {startingDose}</p>
           </div>
         </div>
-        <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
       </div>
       <p className="text-sm text-muted-foreground mb-4 leading-relaxed">{mechanism}</p>
       <div className="flex flex-wrap gap-1.5">
@@ -39,6 +33,6 @@ export function ProtocolCard({ name, mechanism, startingDose, targets, color }: 
           </span>
         ))}
       </div>
-    </motion.div>
+    </div>
   );
 }
