@@ -351,6 +351,20 @@ function ConsultationPage() {
     <div className="min-h-screen bg-background">
       <Navbar />
       <main className="pt-20 pb-12 px-4 mx-auto max-w-4xl">
+        {/* Back button */}
+        <button
+          onClick={() => {
+            stopSpeaking();
+            stopListening();
+            setConversationMode(false);
+            navigate({ to: "/dashboard" });
+          }}
+          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Volver
+        </button>
+
         <div className="mb-6 flex items-start gap-3 px-4 py-3 rounded-2xl bg-bio-warning/10 border border-bio-warning/20">
           <Shield className="h-5 w-5 text-bio-warning shrink-0 mt-0.5" />
           <p className="text-xs text-muted-foreground leading-relaxed">
