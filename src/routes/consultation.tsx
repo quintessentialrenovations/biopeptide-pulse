@@ -582,12 +582,52 @@ function ConsultationPage() {
           </div>
         )}
 
-        {phase === "summary" && (
+        {phase === "summary" && (() => {
+          const ctx = buildPatientContext();
+          const goalsList = (ctx.goals || []).join(", ") || "—";
+          const cw = parseFloat(ctx.currentWeight || "0");
+          const gw = parseFloat(ctx.goalWeight || "0");
+          const ht = parseFloat(ctx.height || "0");
+          const bmi = cw > 0 && ht > 0 ? (cw / ((ht / 100) ** 2)).toFixed(1) : "—";
+          const bmiNum = parseFloat(bmi);
+          const bmiCategory = bmiNum < 18.5 ? "Bajo peso" : bmiNum < 25 ? "Normal" : bmiNum < 30 ? "Sobrepeso" : bmiNum < 35 ? "Obeso Clase I" : bmiNum < 40 ? "Obeso Clase II" : "Obeso Clase III";
+          const bmiDisplay = bmi !== "—" ? `${bmiCategory} (${bmi})` : "—";
+          const weightGoal = cw > 0 && gw > 0 ? `${ctx.currentWeight}kg → ${ctx.goalWeight}kg` : "—";
+
+          // Extract recommended protocol from doctor messages
+          const doctorMessages = messages.filter(m => m.role === "doctor").map(m => m.text).join(" ");
+          let recommendedProtocol = "—";
+          const protocolMatch = doctorMessages.match(/(?:recomiendo|protocolo|dosis\s+inicial|comenzar\s+con|iniciar\s+con)[^.]*?(\d+\.?\d*\s*mg)/i);
+          if (protocolMatch) {
+            const dose = protocolMatch[1];
+            if (doctorMessages.toLowerCase().includes("retatrutide")) {
+              recommendedProtocol = `Retatrutide — ${dose} semanal`;
+            } else {
+              recommendedProtocol = `Tirzepatide — ${dose} semanal`;
+            }
+          } else if (doctorMessages.toLowerCase().includes("tirzepatide")) {
+            recommendedProtocol = "Tirzepatide — según indicación del doctor";
+          } else if (doctorMessages.toLowerCase().includes("retatrutide")) {
+            recommendedProtocol = "Retatrutide — según indicación del doctor";
+          }
+
+          const medHistory = (ctx.medicalHistory || []);
+          const noneKey = t("q.none");
+          const contraindications = medHistory.length === 0 || (medHistory.length === 1 && medHistory[0] === noneKey) ? t("summary.contraindicationsVal") : medHistory.filter(m => m !== noneKey).join(", ");
+
+          const experience = ctx.experience || "—";
+
+          const durationMin = chatStartTime > 0 ? Math.max(1, Math.round((Date.now() - chatStartTime) / 60000)) : 0;
+          const durationDisplay = durationMin > 0 ? `${durationMin} minuto${durationMin !== 1 ? "s" : ""}` : "—";
+
+          const patientName = ctx.patientName || "";
+
+          return (
           <div className="text-center py-8">
             <div className="mx-auto mb-6 h-20 w-20 rounded-3xl gradient-green flex items-center justify-center">
               <CheckCircle className="h-10 w-10 text-white" />
             </div>
-            <h2 className="text-2xl font-extrabold text-foreground mb-2">{t("summary.complete")}</h2>
+            <h2 className="text-2xl font-extrabold text-foreground mb-2">{t("summary.complete")}{patientName ? `, ${patientName}` : ""}</h2>
             <p className="text-muted-foreground max-w-md mx-auto mb-8">{t("summary.desc")}</p>
             <div className="glass-card rounded-2xl p-6 max-w-lg mx-auto mb-8 text-left">
               <h3 className="text-base font-bold text-foreground mb-4 flex items-center gap-2">
@@ -595,12 +635,12 @@ function ConsultationPage() {
                 {t("summary.title")}
               </h3>
               <div className="space-y-3">
-                <SummaryItem label={t("summary.primaryGoal")} value={t("summary.primaryGoalVal")} />
-                <SummaryItem label={t("summary.recommendedProtocol")} value={t("summary.recommendedProtocolVal")} />
-                <SummaryItem label={t("summary.bmi")} value={t("summary.bmiVal")} />
-                <SummaryItem label={t("summary.contraindications")} value={t("summary.contraindicationsVal")} />
-                <SummaryItem label={t("summary.experience")} value={t("summary.experienceVal")} />
-                <SummaryItem label={t("summary.duration")} value={t("summary.durationVal")} />
+                <SummaryItem label={t("summary.primaryGoal")} value={`${goalsList}${weightGoal !== "—" ? ` (${weightGoal})` : ""}`} />
+                <SummaryItem label={t("summary.recommendedProtocol")} value={recommendedProtocol} />
+                <SummaryItem label={t("summary.bmi")} value={bmiDisplay} />
+                <SummaryItem label={t("summary.contraindications")} value={contraindications} />
+                <SummaryItem label={t("summary.experience")} value={experience} />
+                <SummaryItem label={t("summary.duration")} value={durationDisplay} />
               </div>
               <div className="mt-5 p-3 rounded-xl bg-bio-warning/10 border border-bio-warning/20">
                 <p className="text-xs text-muted-foreground leading-relaxed">
@@ -618,7 +658,8 @@ function ConsultationPage() {
               </Button>
             </div>
           </div>
-        )}
+          );
+        })()}
       </main>
 
       {/* Soundbar animation keyframes */}
