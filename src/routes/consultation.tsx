@@ -496,7 +496,7 @@ function ConsultationPage() {
                     ) : (
                       <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm">
                         <span className="h-2 w-2 rounded-full bg-bio-success animate-pulse" />
-                        <span className="text-xs font-medium text-white/70">Dr. IA BioPeptideX</span>
+                        <span className="text-xs font-medium text-white/70">Dr. AI BioPeptideX</span>
                       </div>
                     )}
                   </div>
