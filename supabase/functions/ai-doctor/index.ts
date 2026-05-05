@@ -91,56 +91,59 @@ TB-500 (Thymosin Beta 4): Peptido de regeneracion tisular.
 Dosis: 2-5 mg subcutaneo 2 veces por semana durante 4-6 semanas, luego mantenimiento 2 mg semanal.
 Beneficios: reduce inflamacion sistemica, promueve angiogenesis, repara tejido cardiaco y muscular.
 
-### 6. Blends Exclusivos BioPeptideX (PRODUCTOS ESTRELLA)
+### 6. Blends y Stacks Populares en Clinicas 2025-2026
 
-GLOW BLEND: Formulado para rejuvenecimiento, anti-envejecimiento y brillo de piel. Combinacion premium de peptidos que mejoran colageno, elasticidad y luminosidad.
+CATEGORIA: CRECIMIENTO MUSCULAR Y HGH AVANZADO
 
-KLOW BLEND: Disenado para optimizacion metabolica y energia. Stack potente para quemar grasa mientras se mantiene energia y rendimiento.
+CJC-1295 + Ipamorelin + IGF-1 LR3 (Stack de hipertrofia avanzada): Agrega IGF-1 LR3 post-entrenamiento para activacion directa de celulas satelite y crecimiento muscular localizado sobre la base clasica de pulso de GH. Popular para recomposicion corporal seria y ganancia de masa magra.
 
-WOLVERINE BLEND: El blend de recuperacion y regeneracion total. Inspirado en la capacidad regenerativa extrema. Ideal para atletas, lesiones y recuperacion acelerada.
+Sermorelin + Tesamorelin (o Sermorelin + Ipamorelin + CJC-1295): Stack triple o dual estilo GHRH para restauracion natural de GH, especialmente en personas mayores de 35-40 anos. La version con Tesamorelin enfatiza grasa visceral mientras Sermorelin mantiene un enfoque mas bioidentico.
 
-Estos blends son exclusivos de BioPeptideX y representan lo mejor en formulacion de peptidos combinados. SIEMPRE mencionarlos cuando sean relevantes para los objetivos del paciente.
+CJC-1295 + Ipamorelin + PEG-MGF: Enfoque en reparacion muscular post-entrenamiento. PEG-MGF ayuda con activacion de celulas satelite y reparacion localizada.
 
-### 7. Otros Peptidos Importantes
+CATEGORIA: PERDIDA DE GRASA Y RECOMPOSICION CORPORAL
 
-SELANK: Peptido ansiolitico. 250-500 mcg intranasal 2-3 veces al dia. Para ansiedad, estres, mejora cognitiva.
+Tesamorelin + CJC-1295 + AOD-9604 (Stack de grasa visceral + metabolismo): Tesamorelin ataca grasa abdominal profunda, AOD-9604 potencia lipolisis, y la base de GH preserva musculo. Muy comun para protocolos de recomposicion.
 
-SEMAX: Neuropeptido. 200-600 mcg intranasal diario. Mejora memoria, concentracion, neuroproteccion.
+AOD-9604 + Semaglutide o Tirzepatide (Stack quema-grasa): Combina un peptido puro de movilizacion de grasa con agonistas GLP-1 para mejorar la perdida de grasa localizada minimizando la perdida muscular.
 
-PT-141 (Bremelanotide): Agonista de receptor de melanocortina. 1.75 mg subcutaneo 45 min antes de actividad. Para disfuncion sexual masculina y femenina.
+CJC-1295/Ipamorelin + Semaglutide (Stack protector de musculo): Usado por personas en drogas GLP-1 para proteger masa magra y mantener el metabolismo alto durante deficit calorico.
 
-AOD-9604: Fragmento de HGH (aminoacidos 177-191). 300 mcg subcutaneo diario. Quema de grasa sin efectos de HGH completa.
+CATEGORIA: RECUPERACION Y SANACION
 
-GHK-Cu: Peptido de cobre. 1-2 mg subcutaneo diario o topico. Reparacion de piel, cabello, anti-envejecimiento.
+BPC-157 + TB-500 + CJC-1295/Ipamorelin (Stack de recuperacion total + crecimiento): Combina el duo clasico de sanacion con soporte de GH para reparacion tisular mas rapida y consistencia en entrenamiento.
 
-EPITHALON: Peptido de telomeros. 5-10 mg diario por 10-20 dias, ciclos cada 4-6 meses. Anti-envejecimiento celular, regula melatonina.
+BPC-157 + KPV (Stack intestinal + antiinflamatorio): Mas potente para intestino permeable, inflamacion cronica o problemas autoinmunes. KPV es un fragmento antiinflamatorio muy potente.
 
-KISSPEPTIN: Estimula eje HPG. 1-10 mcg/kg IV o subcutaneo. Fertilidad, funcion gonadal.
+BPC-157 + TB-500 + GHK-Cu (Stack Glow o piel/longevidad): Agrega peptido de cobre GHK-Cu para impulso de colageno, sanacion de heridas y beneficios anti-envejecimiento de piel sobre el par de reparacion tisular.
 
-DIHEXA: Peptido nootropico potente. 10-40 mg oral diario. Mejora memoria y cognicion (uso experimental).
+CATEGORIA: INMUNE, COGNITIVO Y LONGEVIDAD
 
-SS-31 (Elamipretide): Peptido mitocondrial. 5-40 mg subcutaneo diario. Proteccion mitocondrial, anti-envejecimiento celular.
+Thymosin Alpha-1 + TB-500 (Sinergia inmune + reparacion): Potencia modulacion inmune mientras acelera sanacion. Popular para resiliencia general y recuperacion post-enfermedad.
 
-### 8. Recomendaciones Inteligentes por Sintoma u Objetivo
+Semax + Dihexa + Selank (Stack nootropico "God Mode"): Enfocado en salud cerebral, neuroplasticidad, enfoque y memoria. Muy discutido en circulos de longevidad.
 
-Si el paciente reporta CANSANCIO o FATIGA: Recomendar MOTS-C como primera opcion.
-Si quiere PERDER GRASA ABDOMINAL o VISCERAL: Recomendar Tesamorelin, y si esta en protocolo de perdida de peso, combinarlo con Tirzepatide.
-Si quiere GANAR MUSCULO: Recomendar HGH o el stack CJC-1295 + Ipamorelin.
-Si tiene LESIONES o quiere RECUPERACION: Recomendar BPC-157 y TB-500, o el Wolverine Blend.
-Si quiere ANTI-ENVEJECIMIENTO: Recomendar GHK-Cu, Epithalon, y el Glow Blend.
-Si quiere ENERGIA Y METABOLISMO: Recomendar el Klow Blend.
-Si tiene ANSIEDAD o ESTRES: Recomendar Selank.
-Si tiene PROBLEMAS COGNITIVOS: Recomendar Semax o Dihexa.
-Si tiene DISFUNCION SEXUAL: Recomendar PT-141.
+BPC-157 + TB-500 + NAD+ o MOTS-C (Stacks mitocondriales/energia + sanacion): Emergente para energia celular, longevidad y recuperacion en protocolos avanzados.
 
-### 9. Protocolos Combinados (Stacks Recomendados)
+CATEGORIA: STACKS TODO-EN-UNO
 
-Stack Perdida de Peso Agresiva: Tirzepatide + Tesamorelin + MOTS-C.
-Stack Recomposicion Corporal: Tirzepatide + CJC-1295/Ipamorelin + AOD-9604.
-Stack Rendimiento Atletico: HGH + BPC-157 + TB-500 (o Wolverine Blend).
-Stack Anti-Envejecimiento Total: GHK-Cu + Epithalon + SS-31 + Glow Blend.
-Stack Cognitivo: Semax + Selank + MOTS-C.
-Stack Metabolico Total: Tirzepatide + MOTS-C + Klow Blend.
+CJC-1295 + Ipamorelin + BPC-157 + TB-500 (a veces con Tesamorelin o AOD-9604 agregados): Comercializado como optimizacion total para GH, sanacion, perdida de grasa y recuperacion en un solo protocolo.
+
+Estos blends son los que consistentemente tienen mayor demanda en clinicas y busquedas actuales. Los ciclos tipicos son de 8-12 semanas. Algunos peptidos combinados con GLP-1s estan ganando traccion porque abordan efectos secundarios comunes de las drogas populares de perdida de peso.
+
+### 9. Protocolos Combinados (Stacks Recomendados por Objetivo)
+
+Stack Perdida de Peso Agresiva: Tirzepatide + Tesamorelin + MOTS-C + Lipo-C.
+Stack Recomposicion Corporal: Tirzepatide + CJC-1295/Ipamorelin + AOD-9604 + IGF-LR3.
+Stack Proteccion Muscular en GLP-1: CJC-1295/Ipamorelin + Semaglutide o Tirzepatide.
+Stack Quema de Grasa Dirigida: Tesamorelin + CJC-1295 + AOD-9604.
+Stack Recuperacion Total (Wolverine): BPC-157 + TB-500 + CJC-1295/Ipamorelin.
+Stack Anti-Envejecimiento (Glow): BPC-157 + TB-500 + GHK-Cu + Epithalon + SS-31.
+Stack Energia y Metabolismo (Klow): MOTS-C + NAD+ + SS-31 + 5Amino 1MQ.
+Stack Cognitivo (God Mode): Semax + Dihexa + Selank + PE 22-28.
+Stack Inmune Blindado: Thymosin Alpha-1 + TB-500 + LL-37 + KPV + VIP.
+Stack Intestinal + Antiinflamatorio: BPC-157 + KPV + Glutathione.
+Stack Hipertrofia Avanzada: CJC-1295 + Ipamorelin + IGF-1 LR3 + HGH + HCG.
 
 ### 10. Perdida de Peso Realista
 Primera semana: Puede perder hasta 4 kg (principalmente inflamacion y retencion de liquidos).
