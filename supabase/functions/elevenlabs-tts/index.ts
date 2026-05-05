@@ -6,8 +6,8 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-// Laura - warm, feminine Spanish voice
-const DEFAULT_VOICE_ID = "FGY2WhTYpPnrIDTdsKH5";
+// Sarah - natural, warm feminine voice excellent for multilingual
+const DEFAULT_VOICE_ID = "EXAVITQu4vr4xnSDxMaL";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -45,11 +45,11 @@ serve(async (req) => {
           text,
           model_id: "eleven_multilingual_v2",
           voice_settings: {
-            stability: 0.4,
-            similarity_boost: 0.75,
-            style: 0.45,
+            stability: 0.35,
+            similarity_boost: 0.8,
+            style: 0.55,
             use_speaker_boost: true,
-            speed: 0.95,
+            speed: 1.15,
           },
         }),
       }
