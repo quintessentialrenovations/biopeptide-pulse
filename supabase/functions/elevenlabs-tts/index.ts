@@ -119,6 +119,7 @@ serve(async (req) => {
     }
 
     const voice = voiceId || DEFAULT_VOICE_ID;
+    const normalizedText = normalizeForSpeech(text);
 
     const response = await fetch(
       `https://api.elevenlabs.io/v1/text-to-speech/${voice}?output_format=mp3_44100_128`,
