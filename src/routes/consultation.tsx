@@ -84,6 +84,7 @@ function ConsultationPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [chatInput, setChatInput] = useState("");
   const [showRedFlag, setShowRedFlag] = useState(false);
+  const [chatStartTime, setChatStartTime] = useState<number>(0);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [isAiLoading, setIsAiLoading] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
