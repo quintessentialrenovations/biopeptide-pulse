@@ -88,7 +88,9 @@ function ConsultationPage() {
   const [chatStartTime, setChatStartTime] = useState<number>(0);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [conversationMode, setConversationMode] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const conversationModeRef = useRef(false);
 
   const { speak, stop: stopSpeaking, isSpeaking } = useSpeechSynthesis();
   const { startListening, stopListening, isListening, transcript } = useSpeechRecognition();
@@ -123,7 +125,6 @@ function ConsultationPage() {
   const lastSpokenRef = useRef(0);
   const prevLoadingRef = useRef(false);
   useEffect(() => {
-    // Only speak when loading finishes (streaming complete)
     if (prevLoadingRef.current && !isAiLoading && voiceEnabled) {
       const doctorMessages = messages.filter((m) => m.role === "doctor");
       if (doctorMessages.length > lastSpokenRef.current) {
@@ -134,6 +135,28 @@ function ConsultationPage() {
     }
     prevLoadingRef.current = isAiLoading;
   }, [isAiLoading, messages, voiceEnabled, speak, cleanForTTS]);
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    conversationModeRef.current = conversationMode;
+  }, [conversationMode]);
+
+  // Auto-listen after TTS finishes when in conversation mode
+  const prevSpeakingRef = useRef(false);
+  useEffect(() => {
+    if (prevSpeakingRef.current && !isSpeaking && conversationModeRef.current && !isAiLoading) {
+      // Small delay before listening again
+      const timer = setTimeout(() => {
+        if (conversationModeRef.current && !isAiLoading) {
+          startListening((text) => {
+            handleSendChat(text);
+          });
+        }
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+    prevSpeakingRef.current = isSpeaking;
+  }, [isSpeaking, isAiLoading, startListening]);
 
   const buildPatientContext = useCallback(() => {
     return {
@@ -285,6 +308,23 @@ function ConsultationPage() {
     }
   };
 
+  const toggleConversationMode = () => {
+    if (conversationMode) {
+      // Stop conversation mode
+      setConversationMode(false);
+      stopListening();
+      stopSpeaking();
+    } else {
+      // Start conversation mode - enable voice and start listening
+      setConversationMode(true);
+      setVoiceEnabled(true);
+      stopSpeaking();
+      startListening((text) => {
+        handleSendChat(text);
+      });
+    }
+  };
+
   const advanceFromRedFlag = () => {
     setShowRedFlag(false);
     if (currentStep < questionnaireSteps.length - 1) setCurrentStep(currentStep + 1);
@@ -302,6 +342,7 @@ function ConsultationPage() {
   const handleEndSession = () => {
     stopSpeaking();
     stopListening();
+    setConversationMode(false);
     setPhase("summary");
   };
 
@@ -546,6 +587,53 @@ function ConsultationPage() {
               <div ref={chatEndRef} />
             </div>
 
+            {/* Conversation mode button */}
+            <div className="flex justify-center mb-3">
+              <button
+                onClick={toggleConversationMode}
+                className={cn(
+                  "flex items-center gap-2 px-6 py-3 rounded-2xl font-semibold text-sm transition-all",
+                  conversationMode
+                    ? "bg-destructive text-white shadow-lg shadow-destructive/30 animate-pulse"
+                    : "gradient-blue text-white shadow-lg shadow-primary/30 hover:shadow-xl hover:scale-105"
+                )}
+              >
+                {conversationMode ? (
+                  <>
+                    <PhoneOff className="h-5 w-5" />
+                    Detener conversación
+                  </>
+                ) : (
+                  <>
+                    <Mic className="h-5 w-5" />
+                    🎙️ Conversar con Dra. AI
+                  </>
+                )}
+              </button>
+            </div>
+
+            {conversationMode && (
+              <div className="text-center mb-3">
+                {isListening ? (
+                  <p className="text-xs text-destructive animate-pulse font-medium">
+                    🎤 Escuchando... habla ahora
+                  </p>
+                ) : isSpeaking ? (
+                  <p className="text-xs text-bio-success font-medium">
+                    🔊 Dra. AI está hablando...
+                  </p>
+                ) : isAiLoading ? (
+                  <p className="text-xs text-muted-foreground font-medium">
+                    🧠 Pensando...
+                  </p>
+                ) : (
+                  <p className="text-xs text-muted-foreground font-medium">
+                    ⏳ Preparando para escuchar...
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* Input area with voice */}
             <div className="flex gap-2">
               <button
@@ -563,7 +651,7 @@ function ConsultationPage() {
                 value={isListening ? transcript : chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSendChat()}
-                placeholder={isListening ? "Escuchando..." : t("chat.askQuestion")}
+                placeholder={isListening ? "Escuchando..." : conversationMode ? "Modo conversación activo..." : t("chat.askQuestion")}
                 readOnly={isListening}
                 className={cn(
                   "flex-1 h-12 px-4 rounded-2xl border text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary",
@@ -574,12 +662,6 @@ function ConsultationPage() {
                 {isAiLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
               </Button>
             </div>
-
-            {isListening && (
-              <p className="text-center text-xs text-destructive mt-2 animate-pulse">
-                🎤 Habla ahora... el doctor te escucha
-              </p>
-            )}
 
             {/* Peptide Dosing Reference Panel */}
             <PeptideDosingPanel />
