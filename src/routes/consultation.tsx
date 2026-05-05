@@ -580,6 +580,9 @@ function ConsultationPage() {
                 🎤 Habla ahora... el doctor te escucha
               </p>
             )}
+
+            {/* Peptide Dosing Reference Panel */}
+            <PeptideDosingPanel />
           </div>
         )}
 
