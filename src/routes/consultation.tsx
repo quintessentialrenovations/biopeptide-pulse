@@ -318,8 +318,8 @@ function ConsultationPage() {
 
         {phase === "intro" && (
           <div className="text-center py-8">
-            <div className="mx-auto mb-6 h-28 w-28 rounded-full overflow-hidden shadow-lg ring-4 ring-primary/20">
-              <img src={doctorAvatar} alt="Doctor IA" width={512} height={512} className="h-full w-full object-cover" />
+            <div className="mx-auto mb-6 h-28 w-28 rounded-full overflow-hidden shadow-lg ring-4 ring-primary/20 avatar-breathe">
+              <img src={doctorAvatar} alt="Dra. AI" width={512} height={512} className="h-full w-full object-cover" />
             </div>
             <h1 className="text-3xl font-extrabold text-foreground mb-3">{t("consult.meetDoctor")}</h1>
             <p className="text-muted-foreground max-w-lg mx-auto mb-8 leading-relaxed">{t("consult.meetDoctorDesc")}</p>
@@ -461,10 +461,10 @@ function ConsultationPage() {
                   <div className={cn(
                     "h-36 w-36 sm:h-44 sm:w-44 rounded-full overflow-hidden ring-4 transition-all duration-300 relative",
                     isSpeaking
-                      ? "ring-bio-success shadow-[0_0_30px_rgba(34,197,94,0.4)] scale-105"
-                      : "ring-white/20 shadow-lg"
+                      ? "ring-bio-success avatar-speaking"
+                      : "ring-white/20 shadow-lg avatar-breathe"
                   )}>
-                    <img src={doctorAvatar} alt="Doctor IA BioPeptideX"
+                    <img src={doctorAvatar} alt="Dra. AI BioPeptideX"
                       width={512} height={512}
                       className="h-full w-full object-cover" />
                     {/* Lip-sync overlay */}
