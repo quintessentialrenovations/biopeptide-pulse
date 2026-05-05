@@ -254,6 +254,7 @@ function ConsultationPage() {
     else {
       lastSpokenRef.current = 0;
       setPhase("chat");
+      setChatStartTime(Date.now());
       const patientName = fieldValues["q.patientName"] || "";
       const initialMsg: Message = { role: "user", text: `Hola Doctor, me llamo ${patientName}. Acabo de completar el cuestionario. Estoy listo para mi consulta.` };
       const initialMessages = [initialMsg];
