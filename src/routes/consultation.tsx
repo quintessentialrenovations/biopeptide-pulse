@@ -288,7 +288,8 @@ function ConsultationPage() {
     else {
       lastSpokenRef.current = 0;
       setPhase("chat");
-      const initialMsg: Message = { role: "user", text: "Hola Doctor, tengo algunas condiciones médicas pero quiero continuar con la consulta." };
+      const patientName = fieldValues["q.patientName"] || "";
+      const initialMsg: Message = { role: "user", text: `Hola Doctor, me llamo ${patientName}. Tengo algunas condiciones médicas pero quiero continuar con la consulta.` };
       setMessages([initialMsg]);
       streamAiResponse([initialMsg]);
     }
