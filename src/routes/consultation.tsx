@@ -4,7 +4,8 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Video, Mic, MicOff, ChevronRight, CheckCircle, AlertTriangle, FileText,
   Shield, Stethoscope, Heart, Brain, Pill, ClipboardList, Play, ArrowRight,
-  Send, User, Bot, Volume2, VolumeX, PhoneOff, Loader2,
+  Send, User, Bot, Volume2, VolumeX, PhoneOff, Loader2, ChevronDown, Syringe,
+  Zap, Dumbbell, Sparkles, Target,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -495,7 +496,7 @@ function ConsultationPage() {
                     ) : (
                       <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm">
                         <span className="h-2 w-2 rounded-full bg-bio-success animate-pulse" />
-                        <span className="text-xs font-medium text-white/70">Dr. IA BioPeptideX</span>
+                        <span className="text-xs font-medium text-white/70">Dr. AI BioPeptideX</span>
                       </div>
                     )}
                   </div>
@@ -579,6 +580,9 @@ function ConsultationPage() {
                 🎤 Habla ahora... el doctor te escucha
               </p>
             )}
+
+            {/* Peptide Dosing Reference Panel */}
+            <PeptideDosingPanel />
           </div>
         )}
 
@@ -682,6 +686,147 @@ function ConsultationPage() {
           width: 100%;
         }
       `}</style>
+    </div>
+  );
+}
+
+const peptideProducts = [
+  { name: "Tirzepatida 30mg", dose: "5mg semanal inicial, titular cada 4 sem: 7.5, 10, 12.5, 15mg", schedule: "1x/semana SC", category: "weight" },
+  { name: "Tirzepatida 20mg", dose: "5mg semanal inicial, titular gradualmente", schedule: "1x/semana SC", category: "weight" },
+  { name: "Tirzepatida 10mg", dose: "5mg semanal inicial", schedule: "1x/semana SC", category: "weight" },
+  { name: "Retatrutide 15mg", dose: "1-2mg semanal inicial, titular hasta 12mg", schedule: "1x/semana SC", category: "weight" },
+  { name: "Retatrutide 10mg", dose: "1-2mg semanal inicial, titular gradualmente", schedule: "1x/semana SC", category: "weight" },
+  { name: "Cagrilintide 5mg", dose: "0.3mg semanal inicial, titular cada 4 sem hasta 2.4mg", schedule: "1x/semana SC", category: "weight" },
+  { name: "MOTS-C 10mg", dose: "5-10mg SC, 3-5 veces/semana o diario", schedule: "Diario o 3-5x/semana SC", category: "energy" },
+  { name: "Tesamorelin 5mg", dose: "2mg diario SC, preferiblemente antes de dormir", schedule: "Diario SC nocturno", category: "fat" },
+  { name: "HCG 5000iu", dose: "250-500iu 2-3 veces/semana", schedule: "2-3x/semana SC o IM", category: "hormonal" },
+  { name: "BPC-157+TB500 10mg", dose: "250-500mcg de cada uno, 1-2x/dia", schedule: "Diario SC", category: "repair" },
+  { name: "BPC-157 5mg", dose: "250-500mcg SC 1-2 veces/dia", schedule: "Diario SC local o sistémico", category: "repair" },
+  { name: "GHK-Cu 100mg", dose: "1-2mg SC diario o topico", schedule: "Diario SC o topico", category: "antiaging" },
+  { name: "GHK-Cu 50mg", dose: "1-2mg SC diario o topico", schedule: "Diario SC o topico", category: "antiaging" },
+  { name: "Snap 8 10mg", dose: "0.5-1mg topico o SC diario", schedule: "Diario topico/SC", category: "antiaging" },
+  { name: "5Amino 1MQ 5mg", dose: "50-100mg oral diario", schedule: "Diario oral en ayunas", category: "fat" },
+  { name: "Semax 5mg", dose: "200-600mcg intranasal diario", schedule: "Diario intranasal", category: "cognitive" },
+  { name: "Selank 5mg", dose: "250-500mcg intranasal 2-3x/dia", schedule: "2-3x/dia intranasal", category: "cognitive" },
+  { name: "Adamax 5mg", dose: "100-200mcg intranasal diario", schedule: "Diario intranasal", category: "cognitive" },
+  { name: "PE 22-28", dose: "1-2mg SC diario", schedule: "Diario SC", category: "cognitive" },
+  { name: "Pinealeon 10mg", dose: "5-10mg SC o oral diario", schedule: "Diario SC/oral nocturno", category: "antiaging" },
+  { name: "SS-31", dose: "5-40mg SC diario", schedule: "Diario SC", category: "energy" },
+  { name: "LL-37 5mg", dose: "50-100mcg SC diario", schedule: "Diario SC", category: "immune" },
+  { name: "Thymosin Alfa 1 5mg", dose: "1.6mg SC 2-3 veces/semana", schedule: "2-3x/semana SC", category: "immune" },
+  { name: "KPV 5mg", dose: "200-500mcg SC o oral diario", schedule: "Diario SC/oral", category: "immune" },
+  { name: "KPV 10mg", dose: "200-500mcg SC o oral diario", schedule: "Diario SC/oral", category: "immune" },
+  { name: "VIP", dose: "50-100mcg intranasal 2x/dia", schedule: "2x/dia intranasal", category: "immune" },
+  { name: "Glutathione 1500mg", dose: "200-600mg IV o SC, o 500-1500mg oral", schedule: "1-3x/semana IV/SC o diario oral", category: "detox" },
+  { name: "Lipo-C 10ml", dose: "1ml IM semanal (MIC + B12 + L-Carnitina)", schedule: "1-2x/semana IM", category: "fat" },
+  { name: "NAD+ 500mg", dose: "100-500mg IV o 50-100mg SC diario", schedule: "1-2x/semana IV o diario SC", category: "energy" },
+  { name: "IGF-LR3 0.1mg", dose: "20-50mcg SC diario, post-entrenamiento", schedule: "Diario SC post-entreno", category: "muscle" },
+];
+
+const peptideStacks = [
+  { name: "Pérdida de Peso Agresiva", icon: Target, products: ["Tirzepatida", "Tesamorelin", "MOTS-C", "Lipo-C"], desc: "Stack máximo para quema de grasa total, visceral y energía metabólica." },
+  { name: "Recomposición Corporal", icon: Dumbbell, products: ["Tirzepatida", "IGF-LR3", "HCG", "5Amino 1MQ"], desc: "Pierde grasa mientras ganas músculo magro y mantienes hormonas." },
+  { name: "Anti-Envejecimiento Total (Glow Blend)", icon: Sparkles, products: ["GHK-Cu", "Pinealeon", "Snap 8", "Glutathione", "NAD+"], desc: "Rejuvenecimiento celular, piel radiante, telómeros y energía mitocondrial." },
+  { name: "Energía y Metabolismo (Klow Blend)", icon: Zap, products: ["MOTS-C", "NAD+", "SS-31", "5Amino 1MQ"], desc: "Máxima energía celular, optimización mitocondrial y metabolismo activo." },
+  { name: "Recuperación Total (Wolverine Blend)", icon: Shield, products: ["BPC-157+TB500", "Thymosin Alfa 1", "LL-37"], desc: "Regeneración extrema de tejidos, anti-inflamación y sistema inmune." },
+  { name: "Rendimiento Cognitivo", icon: Brain, products: ["Semax", "Selank", "PE 22-28", "Adamax"], desc: "Máxima concentración, memoria, neuroprotección y reducción de ansiedad." },
+  { name: "Sistema Inmune Blindado", icon: Shield, products: ["Thymosin Alfa 1", "LL-37", "KPV", "VIP"], desc: "Refuerzo inmunológico completo, anti-inflamatorio y protección mucosa." },
+];
+
+const categoryLabels: Record<string, string> = {
+  weight: "Pérdida de Peso", fat: "Quema de Grasa", energy: "Energía", muscle: "Músculo",
+  repair: "Reparación", antiaging: "Anti-Envejecimiento", cognitive: "Cognitivo",
+  immune: "Inmune", hormonal: "Hormonal", detox: "Detox",
+};
+const categoryColors: Record<string, string> = {
+  weight: "bg-blue-100 text-blue-700", fat: "bg-orange-100 text-orange-700", energy: "bg-yellow-100 text-yellow-700",
+  muscle: "bg-red-100 text-red-700", repair: "bg-green-100 text-green-700", antiaging: "bg-purple-100 text-purple-700",
+  cognitive: "bg-indigo-100 text-indigo-700", immune: "bg-teal-100 text-teal-700", hormonal: "bg-pink-100 text-pink-700",
+  detox: "bg-emerald-100 text-emerald-700",
+};
+
+function PeptideDosingPanel() {
+  const [open, setOpen] = useState(false);
+  const [tab, setTab] = useState<"products" | "stacks">("products");
+
+  return (
+    <div className="mt-4 glass-card rounded-2xl overflow-hidden">
+      <button onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between px-5 py-3.5 text-left hover:bg-accent/50 transition-colors">
+        <div className="flex items-center gap-2">
+          <Pill className="h-4 w-4 text-primary" />
+          <span className="text-sm font-bold text-foreground">Guía de Dosis y Stacks BioPeptideX</span>
+        </div>
+        <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform", open && "rotate-180")} />
+      </button>
+
+      {open && (
+        <div className="px-5 pb-5">
+          <div className="flex gap-2 mb-4">
+            <button onClick={() => setTab("products")}
+              className={cn("px-4 py-1.5 rounded-xl text-xs font-semibold transition-colors", tab === "products" ? "bg-primary text-white" : "bg-accent text-muted-foreground")}>
+              Productos y Dosis
+            </button>
+            <button onClick={() => setTab("stacks")}
+              className={cn("px-4 py-1.5 rounded-xl text-xs font-semibold transition-colors", tab === "stacks" ? "bg-primary text-white" : "bg-accent text-muted-foreground")}>
+              Stacks por Objetivo
+            </button>
+          </div>
+
+          {tab === "products" && (
+            <div className="space-y-2 max-h-[350px] overflow-y-auto pr-1">
+              {peptideProducts.map((p) => (
+                <div key={p.name} className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 p-3 rounded-xl bg-white border border-border/50">
+                  <div className="flex items-center gap-2 min-w-0 sm:w-[200px] shrink-0">
+                    <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded-md whitespace-nowrap", categoryColors[p.category] || "bg-gray-100 text-gray-600")}>
+                      {categoryLabels[p.category]}
+                    </span>
+                    <span className="text-sm font-bold text-foreground truncate">{p.name}</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-muted-foreground leading-relaxed">{p.dose}</p>
+                    <p className="text-[10px] text-primary font-medium mt-0.5">{p.schedule}</p>
+                  </div>
+                </div>
+              ))}
+              <div className="mt-3 p-3 rounded-xl bg-primary/5 border border-primary/20">
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Visita <a href="https://www.biopeptidex.net" target="_blank" rel="noopener noreferrer" className="text-primary font-semibold underline">www.biopeptidex.net</a> para ver nuestra gama completa de péptidos de alta calidad con Certificado de Análisis (COA).
+                </p>
+              </div>
+            </div>
+          )}
+
+          {tab === "stacks" && (
+            <div className="space-y-3 max-h-[350px] overflow-y-auto pr-1">
+              {peptideStacks.map((s) => {
+                const StackIcon = s.icon;
+                return (
+                  <div key={s.name} className="p-4 rounded-xl bg-white border border-border/50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="h-8 w-8 rounded-lg gradient-blue flex items-center justify-center">
+                        <StackIcon className="h-4 w-4 text-white" />
+                      </div>
+                      <h4 className="text-sm font-bold text-foreground">{s.name}</h4>
+                    </div>
+                    <p className="text-xs text-muted-foreground mb-2">{s.desc}</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {s.products.map((prod) => (
+                        <span key={prod} className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-primary/10 text-primary">{prod}</span>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+              <div className="mt-2 p-3 rounded-xl bg-primary/5 border border-primary/20">
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Pregúntale al Dr. AI cuál es el mejor stack para tus objetivos, o visita <a href="https://www.biopeptidex.net" target="_blank" rel="noopener noreferrer" className="text-primary font-semibold underline">www.biopeptidex.net</a> para ordenar.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
