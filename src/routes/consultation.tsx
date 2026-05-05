@@ -33,7 +33,7 @@ interface QStep {
   titleKey: TranslationKey;
   subtitleKey: TranslationKey;
   optionKeys?: TranslationKey[];
-  fields?: { labelKey: TranslationKey; placeholder: string }[];
+  fields?: { labelKey: TranslationKey; placeholder: string; type?: string }[];
   multi: boolean;
   isRedFlag?: boolean;
 }
