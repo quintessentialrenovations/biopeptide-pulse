@@ -78,6 +78,7 @@ const AI_DOCTOR_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-doct
 
 function ConsultationPage() {
   const { t } = useI18n();
+  const navigate = useNavigate();
   const [phase, setPhase] = useState<Phase>("intro");
   const [currentStep, setCurrentStep] = useState(0);
   const [selections, setSelections] = useState<Record<string, string[]>>({});
