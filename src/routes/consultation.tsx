@@ -376,7 +376,7 @@ function ConsultationPage() {
                     {step.fields.map((field) => (
                       <div key={field.labelKey}>
                         <label className="text-sm font-semibold text-foreground mb-1.5 block">{t(field.labelKey)}</label>
-                        <input type="number" placeholder={field.placeholder}
+                        <input type={field.type || "number"} placeholder={field.placeholder}
                           value={fieldValues[field.labelKey] || ""}
                           onChange={(e) => setFieldValues((p) => ({ ...p, [field.labelKey]: e.target.value }))}
                           className="w-full h-12 px-4 rounded-xl border border-border bg-white text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
