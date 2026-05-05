@@ -73,11 +73,13 @@ function fallbackBrowserTTS(text: string, setIsSpeaking: (v: boolean) => void) {
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.lang = "es-ES";
-  u.rate = 0.95;
-  u.pitch = 1.0;
+  u.rate = 1.1;
+  u.pitch = 1.15;
   const voices = window.speechSynthesis.getVoices();
+  // Prioritize female Spanish voices
   const esVoice =
-    voices.find((v) => v.lang.startsWith("es") && v.name.includes("Google")) ||
+    voices.find((v) => v.lang.startsWith("es") && /female|femenin|google.*es/i.test(v.name)) ||
+    voices.find((v) => v.lang.startsWith("es") && /paulina|mónica|monica|elena|lucia|carmen/i.test(v.name)) ||
     voices.find((v) => v.lang.startsWith("es")) ||
     null;
   if (esVoice) u.voice = esVoice;
