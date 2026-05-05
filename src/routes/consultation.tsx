@@ -4,7 +4,8 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Video, Mic, MicOff, ChevronRight, CheckCircle, AlertTriangle, FileText,
   Shield, Stethoscope, Heart, Brain, Pill, ClipboardList, Play, ArrowRight,
-  Send, User, Bot, Volume2, VolumeX, PhoneOff, Loader2,
+  Send, User, Bot, Volume2, VolumeX, PhoneOff, Loader2, ChevronDown, Syringe,
+  Zap, Dumbbell, Sparkles, Target,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
