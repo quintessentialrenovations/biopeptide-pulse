@@ -290,6 +290,7 @@ function ConsultationPage() {
     else {
       lastSpokenRef.current = 0;
       setPhase("chat");
+      setChatStartTime(Date.now());
       const patientName = fieldValues["q.patientName"] || "";
       const initialMsg: Message = { role: "user", text: `Hola Doctor, me llamo ${patientName}. Tengo algunas condiciones médicas pero quiero continuar con la consulta.` };
       setMessages([initialMsg]);
