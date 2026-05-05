@@ -40,6 +40,14 @@ interface QStep {
 
 const questionnaireSteps: QStep[] = [
   {
+    id: "basicInfo", icon: User, titleKey: "q.basicInfoTitle", subtitleKey: "q.basicInfoSub",
+    fields: [
+      { labelKey: "q.patientName", placeholder: "ej. María", type: "text" },
+      { labelKey: "q.patientAge", placeholder: "ej. 35", type: "number" },
+    ],
+    multi: false,
+  },
+  {
     id: "goals", icon: Heart, titleKey: "q.goals", subtitleKey: "consult.selectAll",
     optionKeys: ["q.weightLoss", "q.bodyRecomp", "q.appetiteControl", "q.metabolicHealth", "q.improvedEnergy", "q.athletic"],
     multi: true,
@@ -47,9 +55,9 @@ const questionnaireSteps: QStep[] = [
   {
     id: "weight", icon: ClipboardList, titleKey: "q.healthTitle", subtitleKey: "q.healthSub",
     fields: [
-      { labelKey: "q.currentWeight", placeholder: "ej. 105" },
-      { labelKey: "q.goalWeight", placeholder: "ej. 85" },
-      { labelKey: "q.height", placeholder: "ej. 175" },
+      { labelKey: "q.currentWeight", placeholder: "ej. 105", type: "number" },
+      { labelKey: "q.goalWeight", placeholder: "ej. 85", type: "number" },
+      { labelKey: "q.height", placeholder: "ej. 175", type: "number" },
     ],
     multi: false,
   },
