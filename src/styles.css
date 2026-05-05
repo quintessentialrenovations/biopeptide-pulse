@@ -189,4 +189,23 @@
     transform: translateY(-2px);
     box-shadow: 0 8px 30px oklch(0.20 0.02 250 / 10%);
   }
+
+  /* Dr. AI avatar breathing animation */
+  .avatar-breathe {
+    animation: avatarBreathe 4s ease-in-out infinite;
+  }
+
+  @keyframes avatarBreathe {
+    0%, 100% { transform: scale(1) translateY(0); }
+    50% { transform: scale(1.02) translateY(-2px); }
+  }
+
+  .avatar-speaking {
+    animation: avatarSpeaking 1.5s ease-in-out infinite;
+  }
+
+  @keyframes avatarSpeaking {
+    0%, 100% { transform: scale(1.05) translateY(0); box-shadow: 0 0 20px oklch(0.65 0.2 145 / 30%); }
+    50% { transform: scale(1.07) translateY(-3px); box-shadow: 0 0 35px oklch(0.65 0.2 145 / 50%); }
+  }
 }
