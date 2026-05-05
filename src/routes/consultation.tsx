@@ -342,6 +342,7 @@ function ConsultationPage() {
   const handleEndSession = () => {
     stopSpeaking();
     stopListening();
+    setConversationMode(false);
     setPhase("summary");
   };
 
