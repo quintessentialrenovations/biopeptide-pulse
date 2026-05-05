@@ -6,8 +6,8 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-// Laura - warm, feminine Spanish voice
-const DEFAULT_VOICE_ID = "FGY2WhTYpPnrIDTdsKH5";
+// Sarah - natural, warm feminine voice excellent for multilingual
+const DEFAULT_VOICE_ID = "EXAVITQu4vr4xnSDxMaL";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
