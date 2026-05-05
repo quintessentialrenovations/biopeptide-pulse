@@ -1,9 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Navbar } from "@/components/Navbar";
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Video, Mic, MicOff, ChevronRight, CheckCircle, AlertTriangle, FileText,
-  Shield, Stethoscope, Heart, Brain, Pill, ClipboardList, Play, ArrowRight,
+  Shield, Stethoscope, Heart, Brain, Pill, ClipboardList, Play, ArrowRight, ArrowLeft,
   Send, User, Bot, Volume2, VolumeX, PhoneOff, Loader2, ChevronDown, Syringe,
   Zap, Dumbbell, Sparkles, Target,
 } from "lucide-react";
