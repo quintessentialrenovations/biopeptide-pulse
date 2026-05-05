@@ -125,7 +125,6 @@ function ConsultationPage() {
   const lastSpokenRef = useRef(0);
   const prevLoadingRef = useRef(false);
   useEffect(() => {
-    // Only speak when loading finishes (streaming complete)
     if (prevLoadingRef.current && !isAiLoading && voiceEnabled) {
       const doctorMessages = messages.filter((m) => m.role === "doctor");
       if (doctorMessages.length > lastSpokenRef.current) {
@@ -136,6 +135,28 @@ function ConsultationPage() {
     }
     prevLoadingRef.current = isAiLoading;
   }, [isAiLoading, messages, voiceEnabled, speak, cleanForTTS]);
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    conversationModeRef.current = conversationMode;
+  }, [conversationMode]);
+
+  // Auto-listen after TTS finishes when in conversation mode
+  const prevSpeakingRef = useRef(false);
+  useEffect(() => {
+    if (prevSpeakingRef.current && !isSpeaking && conversationModeRef.current && !isAiLoading) {
+      // Small delay before listening again
+      const timer = setTimeout(() => {
+        if (conversationModeRef.current && !isAiLoading) {
+          startListening((text) => {
+            handleSendChat(text);
+          });
+        }
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+    prevSpeakingRef.current = isSpeaking;
+  }, [isSpeaking, isAiLoading, startListening]);
 
   const buildPatientContext = useCallback(() => {
     return {
