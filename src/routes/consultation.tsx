@@ -308,6 +308,23 @@ function ConsultationPage() {
     }
   };
 
+  const toggleConversationMode = () => {
+    if (conversationMode) {
+      // Stop conversation mode
+      setConversationMode(false);
+      stopListening();
+      stopSpeaking();
+    } else {
+      // Start conversation mode - enable voice and start listening
+      setConversationMode(true);
+      setVoiceEnabled(true);
+      stopSpeaking();
+      startListening((text) => {
+        handleSendChat(text);
+      });
+    }
+  };
+
   const advanceFromRedFlag = () => {
     setShowRedFlag(false);
     if (currentStep < questionnaireSteps.length - 1) setCurrentStep(currentStep + 1);
