@@ -33,12 +33,20 @@ interface QStep {
   titleKey: TranslationKey;
   subtitleKey: TranslationKey;
   optionKeys?: TranslationKey[];
-  fields?: { labelKey: TranslationKey; placeholder: string }[];
+  fields?: { labelKey: TranslationKey; placeholder: string; type?: string }[];
   multi: boolean;
   isRedFlag?: boolean;
 }
 
 const questionnaireSteps: QStep[] = [
+  {
+    id: "basicInfo", icon: User, titleKey: "q.basicInfoTitle", subtitleKey: "q.basicInfoSub",
+    fields: [
+      { labelKey: "q.patientName", placeholder: "ej. María", type: "text" },
+      { labelKey: "q.patientAge", placeholder: "ej. 35", type: "number" },
+    ],
+    multi: false,
+  },
   {
     id: "goals", icon: Heart, titleKey: "q.goals", subtitleKey: "consult.selectAll",
     optionKeys: ["q.weightLoss", "q.bodyRecomp", "q.appetiteControl", "q.metabolicHealth", "q.improvedEnergy", "q.athletic"],
@@ -47,9 +55,9 @@ const questionnaireSteps: QStep[] = [
   {
     id: "weight", icon: ClipboardList, titleKey: "q.healthTitle", subtitleKey: "q.healthSub",
     fields: [
-      { labelKey: "q.currentWeight", placeholder: "ej. 105" },
-      { labelKey: "q.goalWeight", placeholder: "ej. 85" },
-      { labelKey: "q.height", placeholder: "ej. 175" },
+      { labelKey: "q.currentWeight", placeholder: "ej. 105", type: "number" },
+      { labelKey: "q.goalWeight", placeholder: "ej. 85", type: "number" },
+      { labelKey: "q.height", placeholder: "ej. 175", type: "number" },
     ],
     multi: false,
   },
@@ -76,6 +84,7 @@ function ConsultationPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [chatInput, setChatInput] = useState("");
   const [showRedFlag, setShowRedFlag] = useState(false);
+  const [chatStartTime, setChatStartTime] = useState<number>(0);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [isAiLoading, setIsAiLoading] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -127,6 +136,8 @@ function ConsultationPage() {
 
   const buildPatientContext = useCallback(() => {
     return {
+      patientName: fieldValues["q.patientName"] || undefined,
+      patientAge: fieldValues["q.patientAge"] || undefined,
       goals: selections["goals"] || [],
       currentWeight: fieldValues["q.currentWeight"] || undefined,
       goalWeight: fieldValues["q.goalWeight"] || undefined,
@@ -243,8 +254,9 @@ function ConsultationPage() {
     else {
       lastSpokenRef.current = 0;
       setPhase("chat");
-      // Send initial greeting via AI
-      const initialMsg: Message = { role: "user", text: "Hola Doctor, acabo de completar el cuestionario. Estoy listo para mi consulta." };
+      setChatStartTime(Date.now());
+      const patientName = fieldValues["q.patientName"] || "";
+      const initialMsg: Message = { role: "user", text: `Hola Doctor, me llamo ${patientName}. Acabo de completar el cuestionario. Estoy listo para mi consulta.` };
       const initialMessages = [initialMsg];
       setMessages([initialMsg]);
       streamAiResponse(initialMessages);
@@ -278,7 +290,9 @@ function ConsultationPage() {
     else {
       lastSpokenRef.current = 0;
       setPhase("chat");
-      const initialMsg: Message = { role: "user", text: "Hola Doctor, tengo algunas condiciones médicas pero quiero continuar con la consulta." };
+      setChatStartTime(Date.now());
+      const patientName = fieldValues["q.patientName"] || "";
+      const initialMsg: Message = { role: "user", text: `Hola Doctor, me llamo ${patientName}. Tengo algunas condiciones médicas pero quiero continuar con la consulta.` };
       setMessages([initialMsg]);
       streamAiResponse([initialMsg]);
     }
@@ -366,7 +380,7 @@ function ConsultationPage() {
                     {step.fields.map((field) => (
                       <div key={field.labelKey}>
                         <label className="text-sm font-semibold text-foreground mb-1.5 block">{t(field.labelKey)}</label>
-                        <input type="number" placeholder={field.placeholder}
+                        <input type={field.type || "number"} placeholder={field.placeholder}
                           value={fieldValues[field.labelKey] || ""}
                           onChange={(e) => setFieldValues((p) => ({ ...p, [field.labelKey]: e.target.value }))}
                           className="w-full h-12 px-4 rounded-xl border border-border bg-white text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
@@ -568,12 +582,52 @@ function ConsultationPage() {
           </div>
         )}
 
-        {phase === "summary" && (
+        {phase === "summary" && (() => {
+          const ctx = buildPatientContext();
+          const goalsList = (ctx.goals || []).join(", ") || "—";
+          const cw = parseFloat(ctx.currentWeight || "0");
+          const gw = parseFloat(ctx.goalWeight || "0");
+          const ht = parseFloat(ctx.height || "0");
+          const bmi = cw > 0 && ht > 0 ? (cw / ((ht / 100) ** 2)).toFixed(1) : "—";
+          const bmiNum = parseFloat(bmi);
+          const bmiCategory = bmiNum < 18.5 ? "Bajo peso" : bmiNum < 25 ? "Normal" : bmiNum < 30 ? "Sobrepeso" : bmiNum < 35 ? "Obeso Clase I" : bmiNum < 40 ? "Obeso Clase II" : "Obeso Clase III";
+          const bmiDisplay = bmi !== "—" ? `${bmiCategory} (${bmi})` : "—";
+          const weightGoal = cw > 0 && gw > 0 ? `${ctx.currentWeight}kg → ${ctx.goalWeight}kg` : "—";
+
+          // Extract recommended protocol from doctor messages
+          const doctorMessages = messages.filter(m => m.role === "doctor").map(m => m.text).join(" ");
+          let recommendedProtocol = "—";
+          const protocolMatch = doctorMessages.match(/(?:recomiendo|protocolo|dosis\s+inicial|comenzar\s+con|iniciar\s+con)[^.]*?(\d+\.?\d*\s*mg)/i);
+          if (protocolMatch) {
+            const dose = protocolMatch[1];
+            if (doctorMessages.toLowerCase().includes("retatrutide")) {
+              recommendedProtocol = `Retatrutide — ${dose} semanal`;
+            } else {
+              recommendedProtocol = `Tirzepatide — ${dose} semanal`;
+            }
+          } else if (doctorMessages.toLowerCase().includes("tirzepatide")) {
+            recommendedProtocol = "Tirzepatide — según indicación del doctor";
+          } else if (doctorMessages.toLowerCase().includes("retatrutide")) {
+            recommendedProtocol = "Retatrutide — según indicación del doctor";
+          }
+
+          const medHistory = (ctx.medicalHistory || []);
+          const noneKey = t("q.none");
+          const contraindications = medHistory.length === 0 || (medHistory.length === 1 && medHistory[0] === noneKey) ? t("summary.contraindicationsVal") : medHistory.filter(m => m !== noneKey).join(", ");
+
+          const experience = ctx.experience || "—";
+
+          const durationMin = chatStartTime > 0 ? Math.max(1, Math.round((Date.now() - chatStartTime) / 60000)) : 0;
+          const durationDisplay = durationMin > 0 ? `${durationMin} minuto${durationMin !== 1 ? "s" : ""}` : "—";
+
+          const patientName = ctx.patientName || "";
+
+          return (
           <div className="text-center py-8">
             <div className="mx-auto mb-6 h-20 w-20 rounded-3xl gradient-green flex items-center justify-center">
               <CheckCircle className="h-10 w-10 text-white" />
             </div>
-            <h2 className="text-2xl font-extrabold text-foreground mb-2">{t("summary.complete")}</h2>
+            <h2 className="text-2xl font-extrabold text-foreground mb-2">{t("summary.complete")}{patientName ? `, ${patientName}` : ""}</h2>
             <p className="text-muted-foreground max-w-md mx-auto mb-8">{t("summary.desc")}</p>
             <div className="glass-card rounded-2xl p-6 max-w-lg mx-auto mb-8 text-left">
               <h3 className="text-base font-bold text-foreground mb-4 flex items-center gap-2">
@@ -581,12 +635,12 @@ function ConsultationPage() {
                 {t("summary.title")}
               </h3>
               <div className="space-y-3">
-                <SummaryItem label={t("summary.primaryGoal")} value={t("summary.primaryGoalVal")} />
-                <SummaryItem label={t("summary.recommendedProtocol")} value={t("summary.recommendedProtocolVal")} />
-                <SummaryItem label={t("summary.bmi")} value={t("summary.bmiVal")} />
-                <SummaryItem label={t("summary.contraindications")} value={t("summary.contraindicationsVal")} />
-                <SummaryItem label={t("summary.experience")} value={t("summary.experienceVal")} />
-                <SummaryItem label={t("summary.duration")} value={t("summary.durationVal")} />
+                <SummaryItem label={t("summary.primaryGoal")} value={`${goalsList}${weightGoal !== "—" ? ` (${weightGoal})` : ""}`} />
+                <SummaryItem label={t("summary.recommendedProtocol")} value={recommendedProtocol} />
+                <SummaryItem label={t("summary.bmi")} value={bmiDisplay} />
+                <SummaryItem label={t("summary.contraindications")} value={contraindications} />
+                <SummaryItem label={t("summary.experience")} value={experience} />
+                <SummaryItem label={t("summary.duration")} value={durationDisplay} />
               </div>
               <div className="mt-5 p-3 rounded-xl bg-bio-warning/10 border border-bio-warning/20">
                 <p className="text-xs text-muted-foreground leading-relaxed">
@@ -604,7 +658,8 @@ function ConsultationPage() {
               </Button>
             </div>
           </div>
-        )}
+          );
+        })()}
       </main>
 
       {/* Soundbar animation keyframes */}

@@ -218,6 +218,10 @@ export const translations = {
   "consult.selectAll": { en: "Select all that apply", es: "Selecciona todos los que apliquen" },
 
   // Questionnaire steps — FUTURE TENSE for pre-treatment
+  "q.basicInfoTitle": { en: "Let's get to know you", es: "Vamos a conocerte" },
+  "q.basicInfoSub": { en: "So the doctor can address you personally", es: "Para que el doctor pueda dirigirse a ti personalmente" },
+  "q.patientName": { en: "First Name", es: "Tu Nombre" },
+  "q.patientAge": { en: "Age (years)", es: "Edad (años)" },
   "q.goals": { en: "What are your primary goals?", es: "¿Cuáles son tus objetivos principales al iniciar el tratamiento?" },
   "q.weightLoss": { en: "Weight loss", es: "Pérdida de peso" },
   "q.bodyRecomp": { en: "Body recomposition", es: "Recomposición corporal" },
