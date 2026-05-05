@@ -253,8 +253,8 @@ function ConsultationPage() {
     else {
       lastSpokenRef.current = 0;
       setPhase("chat");
-      // Send initial greeting via AI
-      const initialMsg: Message = { role: "user", text: "Hola Doctor, acabo de completar el cuestionario. Estoy listo para mi consulta." };
+      const patientName = fieldValues["q.patientName"] || "";
+      const initialMsg: Message = { role: "user", text: `Hola Doctor, me llamo ${patientName}. Acabo de completar el cuestionario. Estoy listo para mi consulta.` };
       const initialMessages = [initialMsg];
       setMessages([initialMsg]);
       streamAiResponse(initialMessages);
