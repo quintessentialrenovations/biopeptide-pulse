@@ -135,6 +135,8 @@ function ConsultationPage() {
 
   const buildPatientContext = useCallback(() => {
     return {
+      patientName: fieldValues["q.patientName"] || undefined,
+      patientAge: fieldValues["q.patientAge"] || undefined,
       goals: selections["goals"] || [],
       currentWeight: fieldValues["q.currentWeight"] || undefined,
       goalWeight: fieldValues["q.goalWeight"] || undefined,
