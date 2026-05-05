@@ -88,7 +88,9 @@ function ConsultationPage() {
   const [chatStartTime, setChatStartTime] = useState<number>(0);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [conversationMode, setConversationMode] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const conversationModeRef = useRef(false);
 
   const { speak, stop: stopSpeaking, isSpeaking } = useSpeechSynthesis();
   const { startListening, stopListening, isListening, transcript } = useSpeechRecognition();
