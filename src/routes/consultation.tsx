@@ -815,6 +815,7 @@ const peptideProducts = [
   { name: "KPV 10mg", dose: "200-500mcg SC o oral diario", schedule: "Diario SC/oral", category: "immune" },
   { name: "VIP", dose: "50-100mcg intranasal 2x/dia", schedule: "2x/dia intranasal", category: "immune" },
   { name: "Glutathione 1500mg", dose: "200-600mg IV o SC, o 500-1500mg oral", schedule: "1-3x/semana IV/SC o diario oral", category: "detox" },
+  { name: "Glutathione 600mg", dose: "200-600mg IV o SC, o 300-600mg oral", schedule: "1-3x/semana IV/SC o diario oral", category: "detox", price: 160, originalPrice: 188, discount: 15, currency: "PEN" },
   { name: "Lipo-C 10ml", dose: "1ml IM semanal (MIC + B12 + L-Carnitina)", schedule: "1-2x/semana IM", category: "fat" },
   { name: "NAD+ 500mg", dose: "100-500mg IV o 50-100mg SC diario", schedule: "1-2x/semana IV o diario SC", category: "energy" },
   { name: "IGF-LR3 0.1mg", dose: "20-50mcg SC diario, post-entrenamiento", schedule: "Diario SC post-entreno", category: "muscle" },
