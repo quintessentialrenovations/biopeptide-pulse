@@ -7,7 +7,26 @@ const SILENT_MP3 =
   "data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQxAADB8AhSmxhIIEVCSiJrDCQBTcu3UrAIwUdkRgQbFAZC1CQEwTJ9mjRvBA4UOLD8nKVOWfh+UlK3z/177OXrfOdKl7097LFr89vIRzh9Bb1RH7sdo+jATWdvWZHKpr6+TVk4irGksRsoNOl9rJUYxsAJ8jrj9/Q6/RCKRghQDVlDWNlrUlVKbW/G14u1XOqFaPFc/nGu/GMYjRDyLjmRgQS47akctjOuq56XJBfvcdHhZ4mPxEmZTkhpMUQqdUFOuJ7e3ckh6N4MMiAlGgGLAiwiIIBAQ4uGgUZIEoBAaQiABNAQQEEEAQMEYBjAxhAQyEhwOFBAcjogkB8EQEAYAEABACEYBAYJI8DAYE7AYHCBQQGAwG4DAQGEAQMAQUDBAEDAhAlBwHEBQQDIxAjAcGAYBA0OBgEDgcCBAGAYDAwIBwGEhAEAQMBAwGAwIB4HAgIBgQDgQEAYDAYBg4BBAJDAQEAwHA4DAEAQDAcEAYBAwGAQGAwHBAGCwGAwGAwHAwGBAGCQGBgGBAEAwGBAEAwGAQGAwGAQGAQGAYBAYBAQGAYBAQGAQGAQGAYBAQGAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBA";
 
 let audioUnlocked = false;
+let audioBlocked = false;
 let sharedAudio: HTMLAudioElement | null = null;
+const blockedSubscribers = new Set<(blocked: boolean) => void>();
+
+function setAudioBlocked(v: boolean) {
+  if (audioBlocked === v) return;
+  audioBlocked = v;
+  blockedSubscribers.forEach((cb) => cb(v));
+}
+
+export function useAudioBlocked() {
+  const [blocked, setBlocked] = useState(audioBlocked);
+  useEffect(() => {
+    blockedSubscribers.add(setBlocked);
+    return () => {
+      blockedSubscribers.delete(setBlocked);
+    };
+  }, []);
+  return blocked;
+}
 
 function getSharedAudio(): HTMLAudioElement {
   if (!sharedAudio) {
@@ -22,9 +41,9 @@ function getSharedAudio(): HTMLAudioElement {
 /**
  * Call from a real user gesture (click/touch) BEFORE any programmatic audio playback.
  * Plays a silent MP3 through the shared <audio> element so iOS marks it as user-activated.
+ * Also tries to resume any AudioContext and unlock speechSynthesis.
  */
 export function unlockAudioPlayback() {
-  if (audioUnlocked) return;
   try {
     const a = getSharedAudio();
     a.src = SILENT_MP3;
@@ -34,15 +53,31 @@ export function unlockAudioPlayback() {
     if (p && typeof p.then === "function") {
       p.then(() => {
         audioUnlocked = true;
+        setAudioBlocked(false);
       }).catch(() => {
-        // Will retry on next gesture
+        setAudioBlocked(true);
       });
     } else {
       audioUnlocked = true;
+      setAudioBlocked(false);
     }
   } catch {
     /* ignore */
   }
+  // Prime browser speechSynthesis (Safari needs an utterance from a gesture)
+  try {
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      const u = new SpeechSynthesisUtterance("");
+      u.volume = 0;
+      window.speechSynthesis.speak(u);
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
+export function isAudioUnlocked() {
+  return audioUnlocked;
 }
 
 export function useSpeechSynthesis() {
@@ -113,10 +148,12 @@ export function useSpeechSynthesis() {
         try {
           await audio.play();
           audioUnlocked = true;
+          setAudioBlocked(false);
         } catch (playErr) {
           console.warn("audio.play() rejected, falling back:", playErr);
           audio.removeEventListener("ended", onEnd);
           audio.removeEventListener("error", onErr);
+          setAudioBlocked(true);
           fallbackBrowserTTS(trimmed, locale, setIsSpeaking);
         }
       } catch (err) {

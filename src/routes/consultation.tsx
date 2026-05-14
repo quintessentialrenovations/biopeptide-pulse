@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/i18n/context";
 import type { TranslationKey } from "@/i18n/translations";
-import { useSpeechSynthesis, useSpeechRecognition, unlockAudioPlayback } from "@/hooks/useSpeech";
+import { useSpeechSynthesis, useSpeechRecognition, unlockAudioPlayback, useAudioBlocked } from "@/hooks/useSpeech";
 import doctorAvatar from "@/assets/doctor-avatar.png";
 import ReactMarkdown from "react-markdown";
 
@@ -95,6 +95,7 @@ function ConsultationPage() {
 
   const { speak, stop: stopSpeaking, isSpeaking } = useSpeechSynthesis();
   const { startListening, stopListening, isListening, transcript } = useSpeechRecognition();
+  const audioBlocked = useAudioBlocked();
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -267,6 +268,7 @@ function ConsultationPage() {
   };
 
   const handleNextStep = () => {
+    unlockAudioPlayback();
     const step = questionnaireSteps[currentStep];
     if (step.isRedFlag) {
       const selected = selections[step.id] || [];
@@ -329,6 +331,7 @@ function ConsultationPage() {
   };
 
   const advanceFromRedFlag = () => {
+    unlockAudioPlayback();
     setShowRedFlag(false);
     if (currentStep < questionnaireSteps.length - 1) setCurrentStep(currentStep + 1);
     else {
@@ -386,7 +389,7 @@ function ConsultationPage() {
               <ConsultFeature icon={Video} title={t("consult.liveChat")} desc={t("consult.liveChatDesc")} />
               <ConsultFeature icon={FileText} title={t("consult.doctorSummary")} desc={t("consult.doctorSummaryDesc")} />
             </div>
-            <Button variant="hero" size="lg" onClick={() => setPhase("questionnaire")} className="rounded-2xl px-10">
+            <Button variant="hero" size="lg" onClick={() => { unlockAudioPlayback(); setPhase("questionnaire"); }} className="rounded-2xl px-10">
               {t("consult.startConsultation")} <Play className="h-4 w-4 ml-1" />
             </Button>
             <p className="mt-6 text-xs text-muted-foreground max-w-md mx-auto">{t("consult.duration")}</p>
@@ -501,6 +504,27 @@ function ConsultationPage() {
                 </Button>
               </div>
             </div>
+
+            {/* Audio blocked banner (mobile gesture unlock) */}
+            {audioBlocked && voiceEnabled && (
+              <button
+                onClick={() => {
+                  unlockAudioPlayback();
+                  // Re-speak the latest doctor message
+                  const lastDoctor = [...messages].reverse().find((m) => m.role === "doctor" && m.text);
+                  if (lastDoctor) speak(cleanForTTS(lastDoctor.text), locale);
+                }}
+                className="w-full mb-3 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-primary text-white font-semibold text-sm shadow-lg shadow-primary/30 animate-pulse"
+              >
+                <Volume2 className="h-5 w-5" />
+                Toca aquí para activar el sonido del Dr. IA
+              </button>
+            )}
+
+            {/* Headphones recommendation */}
+            <p className="text-[11px] text-muted-foreground text-center mb-3">
+              🎧 Usa auriculares para mejor experiencia
+            </p>
 
             {/* Doctor avatar video area */}
             <div className="glass-card rounded-2xl overflow-hidden mb-4">
