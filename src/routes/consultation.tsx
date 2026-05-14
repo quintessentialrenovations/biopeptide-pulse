@@ -8,10 +8,11 @@ import {
   Zap, Dumbbell, Sparkles, Target,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/i18n/context";
 import type { TranslationKey } from "@/i18n/translations";
-import { useSpeechSynthesis, useSpeechRecognition, unlockAudioPlayback, useAudioBlocked } from "@/hooks/useSpeech";
+import { useSpeechSynthesis, useSpeechRecognition, unlockAudioPlayback, useAudioBlocked, setSpeechAudioOutput, type VoiceGender } from "@/hooks/useSpeech";
 import doctorAvatar from "@/assets/doctor-avatar.png";
 import ReactMarkdown from "react-markdown";
 
@@ -88,6 +89,11 @@ function ConsultationPage() {
   const [showRedFlag, setShowRedFlag] = useState(false);
   const [chatStartTime, setChatStartTime] = useState<number>(0);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const [voiceGender, setVoiceGender] = useState<VoiceGender>("female");
+  const [voiceVolume, setVoiceVolume] = useState(1);
+  const [isMuted, setIsMuted] = useState(false);
+  const [audioActivated, setAudioActivated] = useState(false);
+  const [lastReadText, setLastReadText] = useState("");
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [conversationMode, setConversationMode] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -96,6 +102,10 @@ function ConsultationPage() {
   const { speak, stop: stopSpeaking, isSpeaking } = useSpeechSynthesis();
   const { startListening, stopListening, isListening, transcript } = useSpeechRecognition();
   const audioBlocked = useAudioBlocked();
+
+  useEffect(() => {
+    setSpeechAudioOutput({ volume: voiceVolume, muted: isMuted || !voiceEnabled });
+  }, [voiceVolume, isMuted, voiceEnabled]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -131,12 +141,14 @@ function ConsultationPage() {
       const doctorMessages = messages.filter((m) => m.role === "doctor");
       if (doctorMessages.length > lastSpokenRef.current) {
         const newest = doctorMessages[doctorMessages.length - 1];
-        speak(cleanForTTS(newest.text), locale);
+        const speechText = cleanForTTS(newest.text);
+        setLastReadText(speechText);
+        speak(speechText, locale, voiceGender);
         lastSpokenRef.current = doctorMessages.length;
       }
     }
     prevLoadingRef.current = isAiLoading;
-  }, [isAiLoading, messages, voiceEnabled, speak, cleanForTTS, locale]);
+  }, [isAiLoading, messages, voiceEnabled, speak, cleanForTTS, locale, voiceGender]);
 
   // Keep ref in sync with state
   useEffect(() => {
@@ -303,6 +315,20 @@ function ConsultationPage() {
     streamAiResponse(newMessages);
   };
 
+  const activateHighAudio = () => {
+    unlockAudioPlayback();
+    setVoiceEnabled(true);
+    setIsMuted(false);
+    setVoiceVolume(1);
+    setAudioActivated(true);
+    const lastDoctor = [...messages].reverse().find((m) => m.role === "doctor" && m.text);
+    if (lastDoctor) {
+      const speechText = cleanForTTS(lastDoctor.text);
+      setLastReadText(speechText);
+      speak(speechText, locale, voiceGender);
+    }
+  };
+
   const handleVoiceInput = () => {
     unlockAudioPlayback();
     if (isListening) {
@@ -326,6 +352,8 @@ function ConsultationPage() {
       // Start conversation mode - enable voice and start listening
       setConversationMode(true);
       setVoiceEnabled(true);
+      setIsMuted(false);
+      setAudioActivated(true);
       stopSpeaking();
       startListening((text) => {
         handleSendChat(text);
@@ -499,10 +527,10 @@ function ConsultationPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button onClick={() => { unlockAudioPlayback(); setVoiceEnabled(!voiceEnabled); if (voiceEnabled) stopSpeaking(); }}
-                  className={cn("p-2 rounded-xl transition-colors", !voiceEnabled ? "bg-destructive/10 text-destructive" : "bg-accent text-muted-foreground hover:text-foreground")}
-                  title={voiceEnabled ? "Silenciar voz" : "Activar voz"}>
-                  {voiceEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+                <button onClick={() => { unlockAudioPlayback(); const nextMuted = !isMuted; setIsMuted(nextMuted); setVoiceEnabled(true); if (nextMuted) stopSpeaking(); }}
+                  className={cn("p-2 rounded-xl transition-colors", isMuted ? "bg-destructive/10 text-destructive" : "bg-accent text-muted-foreground hover:text-foreground")}
+                  title={isMuted ? "Activar voz" : "Silenciar voz"}>
+                  {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
                 </button>
                 <Button variant="outline" size="sm" onClick={handleEndSession} className="rounded-xl text-xs gap-1">
                   <PhoneOff className="h-3.5 w-3.5" />
@@ -511,21 +539,37 @@ function ConsultationPage() {
               </div>
             </div>
 
-            {/* Audio blocked banner (mobile gesture unlock) */}
-            {audioBlocked && voiceEnabled && (
+            {/* Audio activation banner (mobile gesture unlock) */}
+            {voiceEnabled && (!audioActivated || audioBlocked) && (
               <button
-                onClick={() => {
-                  unlockAudioPlayback();
-                  // Re-speak the latest doctor message
-                  const lastDoctor = [...messages].reverse().find((m) => m.role === "doctor" && m.text);
-                  if (lastDoctor) speak(cleanForTTS(lastDoctor.text), locale);
-                }}
-                className="w-full mb-3 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-primary text-white font-semibold text-sm shadow-lg shadow-primary/30 animate-pulse"
+                onClick={activateHighAudio}
+                className="w-full mb-3 flex items-center justify-center gap-2 px-5 py-4 rounded-2xl bg-primary text-primary-foreground font-extrabold text-base shadow-lg shadow-primary/30 animate-pulse"
               >
-                <Volume2 className="h-5 w-5" />
-                Toca aquí para activar el sonido del Dr. IA
+                <Volume2 className="h-6 w-6" />
+                🔊 Activar Sonido Alto
               </button>
             )}
+
+            <div className="glass-card rounded-2xl p-3 mb-3 flex flex-col sm:flex-row sm:items-center gap-3">
+              <div className="flex items-center gap-2 sm:w-44">
+                <button
+                  onClick={() => { const nextMuted = !isMuted; setIsMuted(nextMuted); if (nextMuted) stopSpeaking(); }}
+                  className={cn("h-10 w-10 rounded-xl flex items-center justify-center transition-colors", isMuted ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary")}
+                  title={isMuted ? "Activar sonido" : "Silenciar"}
+                >
+                  {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
+                </button>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-foreground">Volumen alto móvil</p>
+                  <p className="text-[11px] text-muted-foreground">Español latino neutral</p>
+                </div>
+              </div>
+              <Slider value={[voiceVolume]} min={0} max={1} step={0.05} onValueChange={([value]) => setVoiceVolume(value ?? 1)} className="flex-1" />
+              <div className="grid grid-cols-2 gap-1 rounded-xl bg-accent p-1 sm:w-44">
+                <button onClick={() => setVoiceGender("female")} className={cn("rounded-lg px-2 py-1.5 text-xs font-bold transition-colors", voiceGender === "female" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground")}>Dra.</button>
+                <button onClick={() => setVoiceGender("male")} className={cn("rounded-lg px-2 py-1.5 text-xs font-bold transition-colors", voiceGender === "male" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground")}>Dr.</button>
+              </div>
+            </div>
 
             {/* Headphones recommendation */}
             <p className="text-[11px] text-muted-foreground text-center mb-3">
@@ -558,7 +602,7 @@ function ConsultationPage() {
                     {/* Lip-sync overlay */}
                     {isSpeaking && (
                       <div className="absolute bottom-[18%] left-1/2 -translate-x-1/2 w-[28%]">
-                        <div className="lip-sync-mouth rounded-full bg-[#8B4513]/60 backdrop-blur-[1px]" />
+                        <div className="lip-sync-mouth rounded-full bg-bio-peach/70 backdrop-blur-[1px]" />
                       </div>
                     )}
                   </div>
@@ -568,13 +612,13 @@ function ConsultationPage() {
                     {isSpeaking ? (
                       <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-bio-success/20 backdrop-blur-sm">
                         <div className="flex items-center gap-0.5">
-                          {[1, 2, 3, 4, 5].map((i) => (
+                          {[18, 28, 38, 30, 22, 34, 24].map((height, i) => (
                             <div
                               key={i}
-                              className="w-1 bg-bio-success rounded-full"
+                              className="w-1.5 bg-bio-success rounded-full"
                               style={{
-                                animation: `soundbar 0.${3 + i}s ease-in-out infinite alternate`,
-                                height: `${8 + Math.random() * 12}px`,
+                                animation: `soundbar 0.${45 + i * 6}s ease-in-out infinite alternate`,
+                                height: `${height}px`,
                               }}
                             />
                           ))}
@@ -603,6 +647,13 @@ function ConsultationPage() {
                 </div>
               </div>
             </div>
+
+            {lastReadText && (
+              <div className="mb-4 rounded-2xl border border-primary/15 bg-primary/5 px-4 py-3">
+                <p className="text-[11px] font-bold uppercase tracking-wide text-primary mb-1">Texto que está leyendo la voz</p>
+                <p className="text-sm leading-relaxed text-foreground line-clamp-3">{lastReadText}</p>
+              </div>
+            )}
 
             {/* Chat messages */}
             <div className="glass-card rounded-2xl p-4 mb-4 max-h-[300px] overflow-y-auto space-y-3">
@@ -798,8 +849,8 @@ function ConsultationPage() {
       {/* Soundbar animation keyframes */}
       <style>{`
         @keyframes soundbar {
-          0% { height: 4px; }
-          100% { height: 18px; }
+          0% { transform: scaleY(0.35); opacity: 0.65; }
+          100% { transform: scaleY(1.15); opacity: 1; }
         }
         @keyframes lipSync {
           0%, 100% { height: 2px; opacity: 0.4; }

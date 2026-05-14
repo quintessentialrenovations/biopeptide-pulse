@@ -9,7 +9,15 @@ const SILENT_MP3 =
 let audioUnlocked = false;
 let audioBlocked = false;
 let sharedAudio: HTMLAudioElement | null = null;
+let sharedAudioContext: AudioContext | null = null;
+let sharedGainNode: GainNode | null = null;
+let sharedSourceNode: MediaElementAudioSourceNode | null = null;
+let lastElevenLabsError = "";
+let speechVolume = 1;
+let speechMuted = false;
+let elevenLabsUnavailableUntil = 0;
 const blockedSubscribers = new Set<(blocked: boolean) => void>();
+export type VoiceGender = "female" | "male";
 
 function setAudioBlocked(v: boolean) {
   if (audioBlocked === v) return;
@@ -38,6 +46,47 @@ function getSharedAudio(): HTMLAudioElement {
   return sharedAudio;
 }
 
+function getAudioContext(): AudioContext | null {
+  if (typeof window === "undefined") return null;
+  const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+  if (!AudioCtx) return null;
+  if (!sharedAudioContext) sharedAudioContext = new AudioCtx();
+  return sharedAudioContext;
+}
+
+function applyOutputLevel() {
+  if (sharedAudio) {
+    sharedAudio.muted = speechMuted;
+    sharedAudio.volume = speechMuted ? 0 : speechVolume;
+  }
+  if (sharedGainNode) {
+    sharedGainNode.gain.value = speechMuted ? 0 : Math.max(1, speechVolume * 2);
+  }
+}
+
+function ensureBoostGraph() {
+  try {
+    const audio = getSharedAudio();
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    if (!sharedSourceNode) {
+      sharedSourceNode = ctx.createMediaElementSource(audio);
+      sharedGainNode = ctx.createGain();
+      sharedSourceNode.connect(sharedGainNode);
+      sharedGainNode.connect(ctx.destination);
+    }
+    applyOutputLevel();
+  } catch {
+    /* MediaElementSource may already be attached by the browser; keep normal playback. */
+  }
+}
+
+export function setSpeechAudioOutput(options: { volume?: number; muted?: boolean }) {
+  if (typeof options.volume === "number") speechVolume = Math.min(1, Math.max(0, options.volume));
+  if (typeof options.muted === "boolean") speechMuted = options.muted;
+  applyOutputLevel();
+}
+
 /**
  * Call from a real user gesture (click/touch) BEFORE any programmatic audio playback.
  * Plays a silent MP3 through the shared <audio> element so iOS marks it as user-activated.
@@ -45,10 +94,12 @@ function getSharedAudio(): HTMLAudioElement {
  */
 export function unlockAudioPlayback() {
   try {
+    const ctx = getAudioContext();
+    if (ctx?.state === "suspended") void ctx.resume();
+    ensureBoostGraph();
     const a = getSharedAudio();
     a.src = SILENT_MP3;
-    a.muted = false;
-    a.volume = 1;
+    applyOutputLevel();
     const p = a.play();
     if (p && typeof p.then === "function") {
       p.then(() => {
@@ -102,7 +153,7 @@ export function useSpeechSynthesis() {
   }, []);
 
   const speak = useCallback(
-    async (text: string, locale: "es" | "en" = "es") => {
+    async (text: string, locale: "es" | "en" = "es", voiceGender: VoiceGender = "female") => {
       stop();
       const trimmed = text.slice(0, 4500);
 
@@ -112,22 +163,28 @@ export function useSpeechSynthesis() {
       try {
         setIsSpeaking(true);
 
-        const { data, error } = await supabase.functions.invoke("elevenlabs-tts", {
-          body: { text: trimmed, locale },
-        });
+        const shouldTryElevenLabs = Date.now() > elevenLabsUnavailableUntil;
+        const { data, error } = shouldTryElevenLabs
+          ? await supabase.functions.invoke("elevenlabs-tts", {
+              body: { text: trimmed, locale, voiceGender, mobileBoost: true },
+            })
+          : { data: null, error: new Error("Premium TTS temporarily unavailable") };
 
         if (controller.signal.aborted) return;
 
         if (error || !data?.audio) {
           console.warn("ElevenLabs TTS failed, falling back to browser TTS:", error);
-          fallbackBrowserTTS(trimmed, locale, setIsSpeaking);
+          const errorText = String(error?.message || error || data?.error || "").toLowerCase();
+          lastElevenLabsError = errorText;
+          elevenLabsUnavailableUntil = Date.now() + (errorText.includes("api key") || errorText.includes("invalid") ? 10 * 60_000 : 60_000);
+          fallbackBrowserTTS(trimmed, locale, voiceGender, setIsSpeaking);
           return;
         }
 
         const audio = getSharedAudio();
         audio.src = `data:audio/mpeg;base64,${data.audio}`;
-        audio.muted = false;
-        audio.volume = 1;
+        ensureBoostGraph();
+        applyOutputLevel();
 
         const onEnd = () => {
           setIsSpeaking(false);
@@ -140,7 +197,7 @@ export function useSpeechSynthesis() {
           audio.removeEventListener("error", onErr);
           // If playback fails (often mobile gesture issue), fall back to browser TTS
           console.warn("Audio element playback failed, falling back to browser TTS");
-          fallbackBrowserTTS(trimmed, locale, setIsSpeaking);
+          fallbackBrowserTTS(trimmed, locale, voiceGender, setIsSpeaking);
         };
         audio.addEventListener("ended", onEnd);
         audio.addEventListener("error", onErr);
@@ -154,12 +211,12 @@ export function useSpeechSynthesis() {
           audio.removeEventListener("ended", onEnd);
           audio.removeEventListener("error", onErr);
           setAudioBlocked(true);
-          fallbackBrowserTTS(trimmed, locale, setIsSpeaking);
+          fallbackBrowserTTS(trimmed, locale, voiceGender, setIsSpeaking);
         }
       } catch (err) {
         if (controller.signal.aborted) return;
         console.warn("ElevenLabs TTS error, falling back:", err);
-        fallbackBrowserTTS(trimmed, locale, setIsSpeaking);
+        fallbackBrowserTTS(trimmed, locale, voiceGender, setIsSpeaking);
       }
     },
     [stop]
@@ -168,10 +225,15 @@ export function useSpeechSynthesis() {
   return { speak, stop, isSpeaking };
 }
 
+export function getSpeechDiagnostics() {
+  return { lastElevenLabsError, premiumTtsPaused: Date.now() < elevenLabsUnavailableUntil };
+}
+
 // Fallback to browser TTS if ElevenLabs fails or audio.play() blocked
 function fallbackBrowserTTS(
   text: string,
   locale: "es" | "en",
+  voiceGender: VoiceGender,
   setIsSpeaking: (v: boolean) => void
 ) {
   if (typeof window === "undefined" || !window.speechSynthesis) {
@@ -180,16 +242,18 @@ function fallbackBrowserTTS(
   }
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
-  u.lang = locale === "en" ? "en-US" : "es-ES";
-  u.rate = 1.05;
-  u.pitch = 1.1;
+  u.lang = locale === "en" ? "en-US" : "es-MX";
+  u.rate = 1.0;
+  u.pitch = 1.02;
+  u.volume = speechMuted ? 0 : Math.max(0.7, speechVolume);
   const voices = window.speechSynthesis.getVoices();
-  const langPrefix = locale === "en" ? "en" : "es";
+  const preferredSpanish = ["es-MX", "es-US", "es-CO", "es-PE", "es-419"];
   const voice =
-    voices.find(
-      (v) => v.lang.startsWith(langPrefix) && /female|samantha|google/i.test(v.name)
-    ) ||
-    voices.find((v) => v.lang.startsWith(langPrefix)) ||
+    (locale === "es"
+      ? voices.find((v) => preferredSpanish.includes(v.lang) && !/spain|españa|es-ES/i.test(`${v.name} ${v.lang}`) && (voiceGender === "male" ? /male|diego|jorge|carlos|miguel|juan/i.test(v.name) : !/male|diego|jorge|carlos|miguel|juan/i.test(v.name))) ||
+        voices.find((v) => v.lang.startsWith("es") && !/spain|españa|es-ES/i.test(`${v.name} ${v.lang}`))
+      : voices.find((v) => v.lang.startsWith("en") && /female|samantha|google|natural/i.test(v.name)) ||
+        voices.find((v) => v.lang.startsWith("en"))) ||
     null;
   if (voice) u.voice = voice;
   u.onstart = () => setIsSpeaking(true);
@@ -210,7 +274,7 @@ export function useSpeechRecognition() {
       if (!SpeechRecognition) return;
 
       const recognition = new SpeechRecognition();
-      recognition.lang = locale === "en" ? "en-US" : "es-ES";
+      recognition.lang = locale === "en" ? "en-US" : "es-MX";
       recognition.interimResults = true;
       recognition.continuous = false;
 
