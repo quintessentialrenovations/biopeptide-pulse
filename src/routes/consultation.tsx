@@ -490,7 +490,7 @@ function ConsultationPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button onClick={() => { setVoiceEnabled(!voiceEnabled); if (voiceEnabled) stopSpeaking(); }}
+                <button onClick={() => { unlockAudioPlayback(); setVoiceEnabled(!voiceEnabled); if (voiceEnabled) stopSpeaking(); }}
                   className={cn("p-2 rounded-xl transition-colors", !voiceEnabled ? "bg-destructive/10 text-destructive" : "bg-accent text-muted-foreground hover:text-foreground")}
                   title={voiceEnabled ? "Silenciar voz" : "Activar voz"}>
                   {voiceEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
