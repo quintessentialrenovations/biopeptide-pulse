@@ -1,6 +1,7 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { I18nProvider } from "@/i18n/context";
 import { AuthProvider } from "@/hooks/useAuth";
+import { AskDrPepFab } from "@/components/AskDrPepFab";
 
 import appCss from "../styles.css?url";
 
@@ -75,6 +76,7 @@ function RootComponent() {
     <AuthProvider>
       <I18nProvider>
         <Outlet />
+        <AskDrPepFab />
       </I18nProvider>
     </AuthProvider>
   );

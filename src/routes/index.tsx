@@ -167,7 +167,7 @@ function HomePage() {
         </div>
       </section>
 
-      {/* AI Doctor CTA */}
+      {/* Dr. Pep CTA */}
       <section className="py-16 px-4">
         <div className="mx-auto max-w-4xl">
           <div className="glass-card rounded-3xl overflow-hidden">
