@@ -283,7 +283,10 @@ function ConsultationPage() {
       setPhase("chat");
       setChatStartTime(Date.now());
       const patientName = fieldValues["q.patientName"] || "";
-      const initialMsg: Message = { role: "user", text: `Hola Doctor, me llamo ${patientName}. Acabo de completar el cuestionario. Estoy listo para mi consulta.` };
+      const initialText = locale === "en"
+        ? `Hello Doctor, my name is ${patientName}. I just completed the questionnaire. I am ready for my consultation.`
+        : `Hola Doctor, me llamo ${patientName}. Acabo de completar el cuestionario. Estoy listo para mi consulta.`;
+      const initialMsg: Message = { role: "user", text: initialText };
       const initialMessages = [initialMsg];
       setMessages([initialMsg]);
       streamAiResponse(initialMessages);
