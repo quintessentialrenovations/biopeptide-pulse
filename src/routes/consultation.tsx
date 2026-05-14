@@ -19,8 +19,8 @@ import ReactMarkdown from "react-markdown";
 export const Route = createFileRoute("/consultation")({
   head: () => ({
     meta: [
-      { title: "Consulta Doctor IA — BioPeptideX" },
-      { name: "description", content: "Consulta personalizada con nuestro Doctor IA sobre terapia de péptidos." },
+      { title: "Consulta Dr. Pep — BioPeptideX" },
+      { name: "description", content: "Consulta personalizada con nuestro Dr. Pep sobre terapia de péptidos." },
     ],
   }),
   component: ConsultationPage,
@@ -204,7 +204,7 @@ function ConsultationPage() {
 
       if (!resp.ok || !resp.body) {
         const err = await resp.json().catch(() => ({ error: "Error de conexión" }));
-        setMessages((prev) => [...prev, { role: "doctor", text: `⚠️ ${err.error || "Error al conectar con el Doctor IA. Intenta de nuevo."}` }]);
+        setMessages((prev) => [...prev, { role: "doctor", text: `⚠️ ${err.error || "Error al conectar con el Dr. Pep. Intenta de nuevo."}` }]);
         setIsAiLoading(false);
         return;
       }
@@ -260,7 +260,7 @@ function ConsultationPage() {
         }
       }
     } catch (e) {
-      console.error("AI Doctor stream error:", e);
+      console.error("Dr. Pep stream error:", e);
       setMessages((prev) => [...prev, { role: "doctor", text: "⚠️ Error de conexión. Por favor intenta de nuevo." }]);
     }
     setIsAiLoading(false);
@@ -414,7 +414,7 @@ function ConsultationPage() {
         {phase === "intro" && (
           <div className="text-center py-8">
             <div className="mx-auto mb-6 h-28 w-28 rounded-full overflow-hidden shadow-lg ring-4 ring-primary/20 avatar-breathe">
-              <img src={doctorAvatar} alt="Dra. AI" width={512} height={512} className="h-full w-full object-cover" />
+              <img src={doctorAvatar} alt="Dr. Pep" width={512} height={512} className="h-full w-full object-cover" />
             </div>
             <h1 className="text-3xl font-extrabold text-foreground mb-3">{t("consult.meetDoctor")}</h1>
             <p className="text-muted-foreground max-w-lg mx-auto mb-8 leading-relaxed">{t("consult.meetDoctorDesc")}</p>
@@ -517,7 +517,7 @@ function ConsultationPage() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-full overflow-hidden ring-2 ring-primary/30">
-                  <img src={doctorAvatar} alt="Doctor IA" width={40} height={40} className="h-full w-full object-cover" />
+                  <img src={doctorAvatar} alt="Dr. Pep" width={40} height={40} className="h-full w-full object-cover" />
                 </div>
                 <div>
                   <h2 className="text-base font-bold text-foreground">{t("chat.drAiConsultation")}</h2>
@@ -596,7 +596,7 @@ function ConsultationPage() {
                       ? "ring-bio-success avatar-speaking"
                       : "ring-white/20 shadow-lg avatar-breathe"
                   )}>
-                    <img src={doctorAvatar} alt="Dra. AI BioPeptideX"
+                    <img src={doctorAvatar} alt="Dr. Pep BioPeptideX"
                       width={512} height={512}
                       className="h-full w-full object-cover" />
                     {/* Lip-sync overlay */}
@@ -628,7 +628,7 @@ function ConsultationPage() {
                     ) : (
                       <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-sm">
                         <span className="h-2 w-2 rounded-full bg-bio-success animate-pulse" />
-                        <span className="text-xs font-medium text-white/70">Dr. AI BioPeptideX</span>
+                        <span className="text-xs font-medium text-white/70">Dr. Pep BioPeptideX</span>
                       </div>
                     )}
                   </div>
@@ -704,7 +704,7 @@ function ConsultationPage() {
                 ) : (
                   <>
                     <Mic className="h-5 w-5" />
-                    🎙️ Conversar con Dra. AI
+                    🎙️ Conversar con Dr. Pep
                   </>
                 )}
               </button>
@@ -718,7 +718,7 @@ function ConsultationPage() {
                   </p>
                 ) : isSpeaking ? (
                   <p className="text-xs text-bio-success font-medium">
-                    🔊 Dra. AI está hablando...
+                    🔊 Dr. Pep está hablando...
                   </p>
                 ) : isAiLoading ? (
                   <p className="text-xs text-muted-foreground font-medium">
@@ -1001,7 +1001,7 @@ function PeptideDosingPanel() {
               })}
               <div className="mt-2 p-3 rounded-xl bg-primary/5 border border-primary/20">
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  Pregúntale al Dr. AI cuál es el mejor stack para tus objetivos, o visita <a href="https://www.biopeptidex.net" target="_blank" rel="noopener noreferrer" className="text-primary font-semibold underline">www.biopeptidex.net</a> para ordenar.
+                  Pregúntale al Dr. Pep cuál es el mejor stack para tus objetivos, o visita <a href="https://www.biopeptidex.net" target="_blank" rel="noopener noreferrer" className="text-primary font-semibold underline">www.biopeptidex.net</a> para ordenar.
                 </p>
               </div>
             </div>

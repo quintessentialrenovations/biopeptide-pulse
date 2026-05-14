@@ -190,7 +190,7 @@
     box-shadow: 0 8px 30px oklch(0.20 0.02 250 / 10%);
   }
 
-  /* Dr. AI avatar breathing animation */
+  /* Dr. Pep avatar breathing animation */
   .avatar-breathe {
     animation: avatarBreathe 4s ease-in-out infinite;
   }
