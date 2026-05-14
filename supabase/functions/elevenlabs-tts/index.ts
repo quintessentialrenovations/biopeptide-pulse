@@ -110,7 +110,7 @@ serve(async (req) => {
       );
     }
 
-    const { text, voiceId } = await req.json();
+    const { text, voiceId, locale } = await req.json();
     if (!text || typeof text !== "string" || text.length > 5000) {
       return new Response(
         JSON.stringify({ error: "Invalid text (max 5000 chars)" }),
@@ -119,7 +119,9 @@ serve(async (req) => {
     }
 
     const voice = voiceId || DEFAULT_VOICE_ID;
-    const normalizedText = normalizeForSpeech(text);
+    // Spanish-specific normalization (units, peptide names) only for Spanish output.
+    // For English, send the cleaned text as-is so pronunciation isn't broken.
+    const normalizedText = locale === "en" ? text : normalizeForSpeech(text);
 
     const response = await fetch(
       `https://api.elevenlabs.io/v1/text-to-speech/${voice}?output_format=mp3_44100_128`,

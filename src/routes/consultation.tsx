@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/i18n/context";
 import type { TranslationKey } from "@/i18n/translations";
-import { useSpeechSynthesis, useSpeechRecognition } from "@/hooks/useSpeech";
+import { useSpeechSynthesis, useSpeechRecognition, unlockAudioPlayback } from "@/hooks/useSpeech";
 import doctorAvatar from "@/assets/doctor-avatar.png";
 import ReactMarkdown from "react-markdown";
 
@@ -77,7 +77,7 @@ const questionnaireSteps: QStep[] = [
 const AI_DOCTOR_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-doctor`;
 
 function ConsultationPage() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const navigate = useNavigate();
   const [phase, setPhase] = useState<Phase>("intro");
   const [currentStep, setCurrentStep] = useState(0);
@@ -130,12 +130,12 @@ function ConsultationPage() {
       const doctorMessages = messages.filter((m) => m.role === "doctor");
       if (doctorMessages.length > lastSpokenRef.current) {
         const newest = doctorMessages[doctorMessages.length - 1];
-        speak(cleanForTTS(newest.text));
+        speak(cleanForTTS(newest.text), locale);
         lastSpokenRef.current = doctorMessages.length;
       }
     }
     prevLoadingRef.current = isAiLoading;
-  }, [isAiLoading, messages, voiceEnabled, speak, cleanForTTS]);
+  }, [isAiLoading, messages, voiceEnabled, speak, cleanForTTS, locale]);
 
   // Keep ref in sync with state
   useEffect(() => {
@@ -151,13 +151,13 @@ function ConsultationPage() {
         if (conversationModeRef.current && !isAiLoading) {
           startListening((text) => {
             handleSendChat(text);
-          });
+          }, locale);
         }
       }, 600);
       return () => clearTimeout(timer);
     }
     prevSpeakingRef.current = isSpeaking;
-  }, [isSpeaking, isAiLoading, startListening]);
+  }, [isSpeaking, isAiLoading, startListening, locale]);
 
   const buildPatientContext = useCallback(() => {
     return {
@@ -299,17 +299,19 @@ function ConsultationPage() {
   };
 
   const handleVoiceInput = () => {
+    unlockAudioPlayback();
     if (isListening) {
       stopListening();
     } else {
       stopSpeaking();
       startListening((text) => {
         handleSendChat(text);
-      });
+      }, locale);
     }
   };
 
   const toggleConversationMode = () => {
+    unlockAudioPlayback();
     if (conversationMode) {
       // Stop conversation mode
       setConversationMode(false);
@@ -322,7 +324,7 @@ function ConsultationPage() {
       stopSpeaking();
       startListening((text) => {
         handleSendChat(text);
-      });
+      }, locale);
     }
   };
 
@@ -488,7 +490,7 @@ function ConsultationPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button onClick={() => { setVoiceEnabled(!voiceEnabled); if (voiceEnabled) stopSpeaking(); }}
+                <button onClick={() => { unlockAudioPlayback(); setVoiceEnabled(!voiceEnabled); if (voiceEnabled) stopSpeaking(); }}
                   className={cn("p-2 rounded-xl transition-colors", !voiceEnabled ? "bg-destructive/10 text-destructive" : "bg-accent text-muted-foreground hover:text-foreground")}
                   title={voiceEnabled ? "Silenciar voz" : "Activar voz"}>
                   {voiceEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
