@@ -342,7 +342,10 @@ function ConsultationPage() {
       setPhase("chat");
       setChatStartTime(Date.now());
       const patientName = fieldValues["q.patientName"] || "";
-      const initialMsg: Message = { role: "user", text: `Hola Doctor, me llamo ${patientName}. Tengo algunas condiciones médicas pero quiero continuar con la consulta.` };
+      const initialText = locale === "en"
+        ? `Hello Doctor, my name is ${patientName}. I have some medical conditions but I want to continue with the consultation.`
+        : `Hola Doctor, me llamo ${patientName}. Tengo algunas condiciones médicas pero quiero continuar con la consulta.`;
+      const initialMsg: Message = { role: "user", text: initialText };
       setMessages([initialMsg]);
       streamAiResponse([initialMsg]);
     }
