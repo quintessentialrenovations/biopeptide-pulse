@@ -180,22 +180,33 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, patientContext } = await req.json();
+    const { messages, patientContext, locale } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
+    const lang = locale === "en" ? "en" : "es";
+
     // Build context-aware system prompt
     let systemPrompt = SYSTEM_PROMPT;
+
+    if (lang === "en") {
+      systemPrompt += `\n\n## LANGUAGE OVERRIDE (HIGHEST PRIORITY):
+The patient's selected language is ENGLISH. From now on, you MUST respond ENTIRELY in clear, professional, empathetic English. Do NOT use Spanish words or phrases. Translate all medical terminology, recommendations, disclaimers, and the closing line ("This is educational information. Always consult your doctor for any medical decision.") into English. Keep the same tone, structure, and rules — only the language changes.`;
+    } else {
+      systemPrompt += `\n\n## IDIOMA (PRIORIDAD MAXIMA):
+El idioma seleccionado por el paciente es ESPANOL. Responde SIEMPRE en espanol claro, profesional y empatico.`;
+    }
+
     if (patientContext) {
-      systemPrompt += `\n\n## CONTEXTO DEL PACIENTE ACTUAL:\n`;
-      if (patientContext.name) systemPrompt += `- Nombre: ${patientContext.name}\n`;
-      if (patientContext.currentWeight) systemPrompt += `- Peso actual: ${patientContext.currentWeight} kg\n`;
-      if (patientContext.goalWeight) systemPrompt += `- Peso meta: ${patientContext.goalWeight} kg\n`;
-      if (patientContext.height) systemPrompt += `- Estatura: ${patientContext.height} cm\n`;
-      if (patientContext.goals) systemPrompt += `- Objetivos: ${patientContext.goals.join(", ")}\n`;
-      if (patientContext.medicalHistory) systemPrompt += `- Historial médico: ${patientContext.medicalHistory.join(", ")}\n`;
-      if (patientContext.experience) systemPrompt += `- Experiencia con péptidos: ${patientContext.experience}\n`;
-      if (patientContext.peptideType) systemPrompt += `- Péptido seleccionado: ${patientContext.peptideType}\n`;
+      systemPrompt += lang === "en" ? `\n\n## CURRENT PATIENT CONTEXT:\n` : `\n\n## CONTEXTO DEL PACIENTE ACTUAL:\n`;
+      if (patientContext.name) systemPrompt += `- ${lang === "en" ? "Name" : "Nombre"}: ${patientContext.name}\n`;
+      if (patientContext.currentWeight) systemPrompt += `- ${lang === "en" ? "Current weight" : "Peso actual"}: ${patientContext.currentWeight} kg\n`;
+      if (patientContext.goalWeight) systemPrompt += `- ${lang === "en" ? "Goal weight" : "Peso meta"}: ${patientContext.goalWeight} kg\n`;
+      if (patientContext.height) systemPrompt += `- ${lang === "en" ? "Height" : "Estatura"}: ${patientContext.height} cm\n`;
+      if (patientContext.goals) systemPrompt += `- ${lang === "en" ? "Goals" : "Objetivos"}: ${patientContext.goals.join(", ")}\n`;
+      if (patientContext.medicalHistory) systemPrompt += `- ${lang === "en" ? "Medical history" : "Historial médico"}: ${patientContext.medicalHistory.join(", ")}\n`;
+      if (patientContext.experience) systemPrompt += `- ${lang === "en" ? "Peptide experience" : "Experiencia con péptidos"}: ${patientContext.experience}\n`;
+      if (patientContext.peptideType) systemPrompt += `- ${lang === "en" ? "Selected peptide" : "Péptido seleccionado"}: ${patientContext.peptideType}\n`;
     }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
