@@ -233,16 +233,18 @@ function fallbackBrowserTTS(
   }
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
-  u.lang = locale === "en" ? "en-US" : "es-ES";
-  u.rate = 1.05;
-  u.pitch = 1.1;
+  u.lang = locale === "en" ? "en-US" : "es-MX";
+  u.rate = 1.0;
+  u.pitch = 1.02;
+  u.volume = speechMuted ? 0 : Math.max(0.7, speechVolume);
   const voices = window.speechSynthesis.getVoices();
-  const langPrefix = locale === "en" ? "en" : "es";
+  const preferredSpanish = ["es-MX", "es-US", "es-CO", "es-PE", "es-419"];
   const voice =
-    voices.find(
-      (v) => v.lang.startsWith(langPrefix) && /female|samantha|google/i.test(v.name)
-    ) ||
-    voices.find((v) => v.lang.startsWith(langPrefix)) ||
+    (locale === "es"
+      ? voices.find((v) => preferredSpanish.includes(v.lang) && !/spain|españa|es-ES/i.test(`${v.name} ${v.lang}`)) ||
+        voices.find((v) => v.lang.startsWith("es") && !/spain|españa|es-ES/i.test(`${v.name} ${v.lang}`))
+      : voices.find((v) => v.lang.startsWith("en") && /female|samantha|google|natural/i.test(v.name)) ||
+        voices.find((v) => v.lang.startsWith("en"))) ||
     null;
   if (voice) u.voice = voice;
   u.onstart = () => setIsSpeaking(true);
@@ -263,7 +265,7 @@ export function useSpeechRecognition() {
       if (!SpeechRecognition) return;
 
       const recognition = new SpeechRecognition();
-      recognition.lang = locale === "en" ? "en-US" : "es-ES";
+      recognition.lang = locale === "en" ? "en-US" : "es-MX";
       recognition.interimResults = true;
       recognition.continuous = false;
 
