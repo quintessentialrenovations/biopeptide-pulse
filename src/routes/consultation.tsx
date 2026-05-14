@@ -187,7 +187,7 @@ function ConsultationPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ messages: apiMessages, patientContext: buildPatientContext() }),
+        body: JSON.stringify({ messages: apiMessages, patientContext: buildPatientContext(), locale }),
       });
 
       if (!resp.ok || !resp.body) {
