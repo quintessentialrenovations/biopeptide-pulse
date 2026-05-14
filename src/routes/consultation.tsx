@@ -505,6 +505,27 @@ function ConsultationPage() {
               </div>
             </div>
 
+            {/* Audio blocked banner (mobile gesture unlock) */}
+            {audioBlocked && voiceEnabled && (
+              <button
+                onClick={() => {
+                  unlockAudioPlayback();
+                  // Re-speak the latest doctor message
+                  const lastDoctor = [...messages].reverse().find((m) => m.role === "doctor" && m.text);
+                  if (lastDoctor) speak(cleanForTTS(lastDoctor.text), locale);
+                }}
+                className="w-full mb-3 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-primary text-white font-semibold text-sm shadow-lg shadow-primary/30 animate-pulse"
+              >
+                <Volume2 className="h-5 w-5" />
+                Toca aquí para activar el sonido del Dr. IA
+              </button>
+            )}
+
+            {/* Headphones recommendation */}
+            <p className="text-[11px] text-muted-foreground text-center mb-3">
+              🎧 Usa auriculares para mejor experiencia
+            </p>
+
             {/* Doctor avatar video area */}
             <div className="glass-card rounded-2xl overflow-hidden mb-4">
               <div className="relative bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 flex items-center justify-center"
