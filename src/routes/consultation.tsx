@@ -315,6 +315,20 @@ function ConsultationPage() {
     streamAiResponse(newMessages);
   };
 
+  const activateHighAudio = () => {
+    unlockAudioPlayback();
+    setVoiceEnabled(true);
+    setIsMuted(false);
+    setVoiceVolume(1);
+    setAudioActivated(true);
+    const lastDoctor = [...messages].reverse().find((m) => m.role === "doctor" && m.text);
+    if (lastDoctor) {
+      const speechText = cleanForTTS(lastDoctor.text);
+      setLastReadText(speechText);
+      speak(speechText, locale, voiceGender);
+    }
+  };
+
   const handleVoiceInput = () => {
     unlockAudioPlayback();
     if (isListening) {
@@ -338,6 +352,8 @@ function ConsultationPage() {
       // Start conversation mode - enable voice and start listening
       setConversationMode(true);
       setVoiceEnabled(true);
+      setIsMuted(false);
+      setAudioActivated(true);
       stopSpeaking();
       startListening((text) => {
         handleSendChat(text);
