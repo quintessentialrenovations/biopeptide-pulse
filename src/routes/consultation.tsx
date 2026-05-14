@@ -268,6 +268,7 @@ function ConsultationPage() {
   };
 
   const handleNextStep = () => {
+    unlockAudioPlayback();
     const step = questionnaireSteps[currentStep];
     if (step.isRedFlag) {
       const selected = selections[step.id] || [];
