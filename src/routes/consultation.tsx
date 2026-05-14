@@ -130,12 +130,12 @@ function ConsultationPage() {
       const doctorMessages = messages.filter((m) => m.role === "doctor");
       if (doctorMessages.length > lastSpokenRef.current) {
         const newest = doctorMessages[doctorMessages.length - 1];
-        speak(cleanForTTS(newest.text));
+        speak(cleanForTTS(newest.text), locale);
         lastSpokenRef.current = doctorMessages.length;
       }
     }
     prevLoadingRef.current = isAiLoading;
-  }, [isAiLoading, messages, voiceEnabled, speak, cleanForTTS]);
+  }, [isAiLoading, messages, voiceEnabled, speak, cleanForTTS, locale]);
 
   // Keep ref in sync with state
   useEffect(() => {
@@ -151,13 +151,13 @@ function ConsultationPage() {
         if (conversationModeRef.current && !isAiLoading) {
           startListening((text) => {
             handleSendChat(text);
-          });
+          }, locale);
         }
       }, 600);
       return () => clearTimeout(timer);
     }
     prevSpeakingRef.current = isSpeaking;
-  }, [isSpeaking, isAiLoading, startListening]);
+  }, [isSpeaking, isAiLoading, startListening, locale]);
 
   const buildPatientContext = useCallback(() => {
     return {
