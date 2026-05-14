@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/i18n/context";
 import type { TranslationKey } from "@/i18n/translations";
-import { useSpeechSynthesis, useSpeechRecognition, unlockAudioPlayback } from "@/hooks/useSpeech";
+import { useSpeechSynthesis, useSpeechRecognition, unlockAudioPlayback, useAudioBlocked } from "@/hooks/useSpeech";
 import doctorAvatar from "@/assets/doctor-avatar.png";
 import ReactMarkdown from "react-markdown";
 
