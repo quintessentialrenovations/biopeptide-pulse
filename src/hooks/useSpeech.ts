@@ -12,6 +12,7 @@ let sharedAudio: HTMLAudioElement | null = null;
 let sharedAudioContext: AudioContext | null = null;
 let sharedGainNode: GainNode | null = null;
 let sharedSourceNode: MediaElementAudioSourceNode | null = null;
+let lastElevenLabsError = "";
 let speechVolume = 1;
 let speechMuted = false;
 let elevenLabsUnavailableUntil = 0;
@@ -173,7 +174,9 @@ export function useSpeechSynthesis() {
 
         if (error || !data?.audio) {
           console.warn("ElevenLabs TTS failed, falling back to browser TTS:", error);
-          elevenLabsUnavailableUntil = Date.now() + 60_000;
+          const errorText = String(error?.message || error || data?.error || "").toLowerCase();
+          lastElevenLabsError = errorText;
+          elevenLabsUnavailableUntil = Date.now() + (errorText.includes("api key") || errorText.includes("invalid") ? 10 * 60_000 : 60_000);
           fallbackBrowserTTS(trimmed, locale, voiceGender, setIsSpeaking);
           return;
         }
@@ -220,6 +223,10 @@ export function useSpeechSynthesis() {
   );
 
   return { speak, stop, isSpeaking };
+}
+
+export function getSpeechDiagnostics() {
+  return { lastElevenLabsError, premiumTtsPaused: Date.now() < elevenLabsUnavailableUntil };
 }
 
 // Fallback to browser TTS if ElevenLabs fails or audio.play() blocked
