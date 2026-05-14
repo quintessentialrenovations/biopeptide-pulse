@@ -6,8 +6,9 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-// Sarah - natural, warm feminine voice excellent for multilingual
-const DEFAULT_VOICE_ID = "EXAVITQu4vr4xnSDxMaL";
+// Warm, clear voices for mobile playback. Keep Spanish output on multilingual v2.
+const FEMALE_VOICE_ID = "FGY2WhTYpPnrIDTdsKH5"; // Laura
+const MALE_VOICE_ID = "onwK4e9ZLuTAKqWW03F9"; // Daniel
 
 // Normalize text for natural TTS pronunciation
 function normalizeForSpeech(raw: string): string {
@@ -110,7 +111,7 @@ serve(async (req) => {
       );
     }
 
-    const { text, voiceId, locale } = await req.json();
+    const { text, voiceId, locale, voiceGender } = await req.json();
     if (!text || typeof text !== "string" || text.length > 5000) {
       return new Response(
         JSON.stringify({ error: "Invalid text (max 5000 chars)" }),
@@ -118,7 +119,7 @@ serve(async (req) => {
       );
     }
 
-    const voice = voiceId || DEFAULT_VOICE_ID;
+    const voice = voiceId || (voiceGender === "male" ? MALE_VOICE_ID : FEMALE_VOICE_ID);
     // Spanish-specific normalization (units, peptide names) only for Spanish output.
     // For English, send the cleaned text as-is so pronunciation isn't broken.
     const normalizedText = locale === "en" ? text : normalizeForSpeech(text);
@@ -134,12 +135,13 @@ serve(async (req) => {
         body: JSON.stringify({
           text: normalizedText,
           model_id: "eleven_multilingual_v2",
+          language_code: locale === "en" ? "en" : "es",
           voice_settings: {
-            stability: 0.35,
-            similarity_boost: 0.8,
-            style: 0.55,
+            stability: 0.85,
+            similarity_boost: 0.9,
+            style: 0.2,
             use_speaker_boost: true,
-            speed: 1.15,
+            speed: 1.0,
           },
         }),
       }
