@@ -8,10 +8,11 @@ import {
   Zap, Dumbbell, Sparkles, Target,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/i18n/context";
 import type { TranslationKey } from "@/i18n/translations";
-import { useSpeechSynthesis, useSpeechRecognition, unlockAudioPlayback, useAudioBlocked } from "@/hooks/useSpeech";
+import { useSpeechSynthesis, useSpeechRecognition, unlockAudioPlayback, useAudioBlocked, setSpeechAudioOutput, type VoiceGender } from "@/hooks/useSpeech";
 import doctorAvatar from "@/assets/doctor-avatar.png";
 import ReactMarkdown from "react-markdown";
 
@@ -88,6 +89,11 @@ function ConsultationPage() {
   const [showRedFlag, setShowRedFlag] = useState(false);
   const [chatStartTime, setChatStartTime] = useState<number>(0);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const [voiceGender, setVoiceGender] = useState<VoiceGender>("female");
+  const [voiceVolume, setVoiceVolume] = useState(1);
+  const [isMuted, setIsMuted] = useState(false);
+  const [audioActivated, setAudioActivated] = useState(false);
+  const [lastReadText, setLastReadText] = useState("");
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [conversationMode, setConversationMode] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -96,6 +102,10 @@ function ConsultationPage() {
   const { speak, stop: stopSpeaking, isSpeaking } = useSpeechSynthesis();
   const { startListening, stopListening, isListening, transcript } = useSpeechRecognition();
   const audioBlocked = useAudioBlocked();
+
+  useEffect(() => {
+    setSpeechAudioOutput({ volume: voiceVolume, muted: isMuted || !voiceEnabled });
+  }, [voiceVolume, isMuted, voiceEnabled]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -131,12 +141,14 @@ function ConsultationPage() {
       const doctorMessages = messages.filter((m) => m.role === "doctor");
       if (doctorMessages.length > lastSpokenRef.current) {
         const newest = doctorMessages[doctorMessages.length - 1];
-        speak(cleanForTTS(newest.text), locale);
+        const speechText = cleanForTTS(newest.text);
+        setLastReadText(speechText);
+        speak(speechText, locale, voiceGender);
         lastSpokenRef.current = doctorMessages.length;
       }
     }
     prevLoadingRef.current = isAiLoading;
-  }, [isAiLoading, messages, voiceEnabled, speak, cleanForTTS, locale]);
+  }, [isAiLoading, messages, voiceEnabled, speak, cleanForTTS, locale, voiceGender]);
 
   // Keep ref in sync with state
   useEffect(() => {
