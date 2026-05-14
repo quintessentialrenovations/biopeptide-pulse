@@ -252,7 +252,7 @@ function ConsultationPage() {
       setMessages((prev) => [...prev, { role: "doctor", text: "⚠️ Error de conexión. Por favor intenta de nuevo." }]);
     }
     setIsAiLoading(false);
-  }, [buildPatientContext]);
+  }, [buildPatientContext, locale]);
 
   const toggleSelection = (stepId: string, option: string, multi: boolean) => {
     setSelections((prev) => {
