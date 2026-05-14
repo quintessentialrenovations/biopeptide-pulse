@@ -148,10 +148,12 @@ export function useSpeechSynthesis() {
         try {
           await audio.play();
           audioUnlocked = true;
+          setAudioBlocked(false);
         } catch (playErr) {
           console.warn("audio.play() rejected, falling back:", playErr);
           audio.removeEventListener("ended", onEnd);
           audio.removeEventListener("error", onErr);
+          setAudioBlocked(true);
           fallbackBrowserTTS(trimmed, locale, setIsSpeaking);
         }
       } catch (err) {
