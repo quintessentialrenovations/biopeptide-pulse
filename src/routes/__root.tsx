@@ -76,6 +76,7 @@ function RootComponent() {
     <AuthProvider>
       <I18nProvider>
         <Outlet />
+        <AskDrPepFab />
       </I18nProvider>
     </AuthProvider>
   );
