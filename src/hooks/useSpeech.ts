@@ -1,88 +1,160 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
+// Tiny silent MP3 used to unlock audio playback on iOS Safari / mobile browsers.
+// Must be played from a real user gesture before any subsequent programmatic .play().
+const SILENT_MP3 =
+  "data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQxAADB8AhSmxhIIEVCSiJrDCQBTcu3UrAIwUdkRgQbFAZC1CQEwTJ9mjRvBA4UOLD8nKVOWfh+UlK3z/177OXrfOdKl7097LFr89vIRzh9Bb1RH7sdo+jATWdvWZHKpr6+TVk4irGksRsoNOl9rJUYxsAJ8jrj9/Q6/RCKRghQDVlDWNlrUlVKbW/G14u1XOqFaPFc/nGu/GMYjRDyLjmRgQS47akctjOuq56XJBfvcdHhZ4mPxEmZTkhpMUQqdUFOuJ7e3ckh6N4MMiAlGgGLAiwiIIBAQ4uGgUZIEoBAaQiABNAQQEEEAQMEYBjAxhAQyEhwOFBAcjogkB8EQEAYAEABACEYBAYJI8DAYE7AYHCBQQGAwG4DAQGEAQMAQUDBAEDAhAlBwHEBQQDIxAjAcGAYBA0OBgEDgcCBAGAYDAwIBwGEhAEAQMBAwGAwIB4HAgIBgQDgQEAYDAYBg4BBAJDAQEAwHA4DAEAQDAcEAYBAwGAQGAwHBAGCwGAwGAwHAwGBAGCQGBgGBAEAwGBAEAwGAQGAwGAQGAQGAYBAYBAQGAYBAQGAQGAQGAYBAQGAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBAYBA";
+
+let audioUnlocked = false;
+let sharedAudio: HTMLAudioElement | null = null;
+
+function getSharedAudio(): HTMLAudioElement {
+  if (!sharedAudio) {
+    sharedAudio = new Audio();
+    sharedAudio.preload = "auto";
+    (sharedAudio as any).playsInline = true;
+    sharedAudio.setAttribute("playsinline", "true");
+  }
+  return sharedAudio;
+}
+
+/**
+ * Call from a real user gesture (click/touch) BEFORE any programmatic audio playback.
+ * Plays a silent MP3 through the shared <audio> element so iOS marks it as user-activated.
+ */
+export function unlockAudioPlayback() {
+  if (audioUnlocked) return;
+  try {
+    const a = getSharedAudio();
+    a.src = SILENT_MP3;
+    a.muted = false;
+    a.volume = 1;
+    const p = a.play();
+    if (p && typeof p.then === "function") {
+      p.then(() => {
+        audioUnlocked = true;
+      }).catch(() => {
+        // Will retry on next gesture
+      });
+    } else {
+      audioUnlocked = true;
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
 export function useSpeechSynthesis() {
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   const stop = useCallback(() => {
     abortRef.current?.abort();
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      audioRef.current = null;
+    if (sharedAudio) {
+      try {
+        sharedAudio.pause();
+        sharedAudio.removeAttribute("src");
+        sharedAudio.load();
+      } catch {
+        /* noop */
+      }
+    }
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
     }
     setIsSpeaking(false);
   }, []);
 
-  const speak = useCallback(async (text: string) => {
-    stop();
+  const speak = useCallback(
+    async (text: string, locale: "es" | "en" = "es") => {
+      stop();
+      const trimmed = text.slice(0, 4500);
 
-    // Limit text length for API
-    const trimmed = text.slice(0, 4500);
+      const controller = new AbortController();
+      abortRef.current = controller;
 
-    const controller = new AbortController();
-    abortRef.current = controller;
+      try {
+        setIsSpeaking(true);
 
-    try {
-      setIsSpeaking(true);
+        const { data, error } = await supabase.functions.invoke("elevenlabs-tts", {
+          body: { text: trimmed, locale },
+        });
 
-      const { data, error } = await supabase.functions.invoke("elevenlabs-tts", {
-        body: { text: trimmed },
-      });
+        if (controller.signal.aborted) return;
 
-      if (controller.signal.aborted) return;
+        if (error || !data?.audio) {
+          console.warn("ElevenLabs TTS failed, falling back to browser TTS:", error);
+          fallbackBrowserTTS(trimmed, locale, setIsSpeaking);
+          return;
+        }
 
-      if (error || !data?.audio) {
-        console.warn("ElevenLabs TTS failed, falling back to browser TTS:", error);
-        fallbackBrowserTTS(trimmed, setIsSpeaking);
-        return;
+        const audio = getSharedAudio();
+        audio.src = `data:audio/mpeg;base64,${data.audio}`;
+        audio.muted = false;
+        audio.volume = 1;
+
+        const onEnd = () => {
+          setIsSpeaking(false);
+          audio.removeEventListener("ended", onEnd);
+          audio.removeEventListener("error", onErr);
+        };
+        const onErr = () => {
+          setIsSpeaking(false);
+          audio.removeEventListener("ended", onEnd);
+          audio.removeEventListener("error", onErr);
+          // If playback fails (often mobile gesture issue), fall back to browser TTS
+          console.warn("Audio element playback failed, falling back to browser TTS");
+          fallbackBrowserTTS(trimmed, locale, setIsSpeaking);
+        };
+        audio.addEventListener("ended", onEnd);
+        audio.addEventListener("error", onErr);
+
+        try {
+          await audio.play();
+          audioUnlocked = true;
+        } catch (playErr) {
+          console.warn("audio.play() rejected, falling back:", playErr);
+          audio.removeEventListener("ended", onEnd);
+          audio.removeEventListener("error", onErr);
+          fallbackBrowserTTS(trimmed, locale, setIsSpeaking);
+        }
+      } catch (err) {
+        if (controller.signal.aborted) return;
+        console.warn("ElevenLabs TTS error, falling back:", err);
+        fallbackBrowserTTS(trimmed, locale, setIsSpeaking);
       }
-
-      const audioUrl = `data:audio/mpeg;base64,${data.audio}`;
-      const audio = new Audio(audioUrl);
-      audioRef.current = audio;
-
-      audio.onended = () => {
-        setIsSpeaking(false);
-        audioRef.current = null;
-      };
-      audio.onerror = () => {
-        setIsSpeaking(false);
-        audioRef.current = null;
-      };
-
-      await audio.play();
-    } catch (err) {
-      if (controller.signal.aborted) return;
-      console.warn("ElevenLabs TTS error, falling back:", err);
-      fallbackBrowserTTS(trimmed, setIsSpeaking);
-    }
-  }, [stop]);
+    },
+    [stop]
+  );
 
   return { speak, stop, isSpeaking };
 }
 
-// Fallback to browser TTS if ElevenLabs fails
-function fallbackBrowserTTS(text: string, setIsSpeaking: (v: boolean) => void) {
-  if (!window.speechSynthesis) {
+// Fallback to browser TTS if ElevenLabs fails or audio.play() blocked
+function fallbackBrowserTTS(
+  text: string,
+  locale: "es" | "en",
+  setIsSpeaking: (v: boolean) => void
+) {
+  if (typeof window === "undefined" || !window.speechSynthesis) {
     setIsSpeaking(false);
     return;
   }
   window.speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
-  u.lang = "es-ES";
-  u.rate = 1.1;
-  u.pitch = 1.15;
+  u.lang = locale === "en" ? "en-US" : "es-ES";
+  u.rate = 1.05;
+  u.pitch = 1.1;
   const voices = window.speechSynthesis.getVoices();
-  // Prioritize female Spanish voices
-  const esVoice =
-    voices.find((v) => v.lang.startsWith("es") && /female|femenin|google.*es/i.test(v.name)) ||
-    voices.find((v) => v.lang.startsWith("es") && /paulina|mónica|monica|elena|lucia|carmen/i.test(v.name)) ||
-    voices.find((v) => v.lang.startsWith("es")) ||
+  const langPrefix = locale === "en" ? "en" : "es";
+  const voice =
+    voices.find(
+      (v) => v.lang.startsWith(langPrefix) && /female|samantha|google/i.test(v.name)
+    ) ||
+    voices.find((v) => v.lang.startsWith(langPrefix)) ||
     null;
-  if (esVoice) u.voice = esVoice;
+  if (voice) u.voice = voice;
   u.onstart = () => setIsSpeaking(true);
   u.onend = () => setIsSpeaking(false);
   u.onerror = () => setIsSpeaking(false);
@@ -94,40 +166,44 @@ export function useSpeechRecognition() {
   const [transcript, setTranscript] = useState("");
   const recognitionRef = useRef<any>(null);
 
-  const startListening = useCallback((onResult: (text: string) => void) => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) return;
+  const startListening = useCallback(
+    (onResult: (text: string) => void, locale: "es" | "en" = "es") => {
+      const SpeechRecognition =
+        (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (!SpeechRecognition) return;
 
-    const recognition = new SpeechRecognition();
-    recognition.lang = "es-ES";
-    recognition.interimResults = true;
-    recognition.continuous = false;
+      const recognition = new SpeechRecognition();
+      recognition.lang = locale === "en" ? "en-US" : "es-ES";
+      recognition.interimResults = true;
+      recognition.continuous = false;
 
-    recognition.onresult = (event: any) => {
-      let finalText = "";
-      let interimText = "";
-      for (let i = 0; i < event.results.length; i++) {
-        if (event.results[i].isFinal) {
-          finalText += event.results[i][0].transcript;
-        } else {
-          interimText += event.results[i][0].transcript;
+      recognition.onresult = (event: any) => {
+        let finalText = "";
+        let interimText = "";
+        for (let i = 0; i < event.results.length; i++) {
+          if (event.results[i].isFinal) {
+            finalText += event.results[i][0].transcript;
+          } else {
+            interimText += event.results[i][0].transcript;
+          }
         }
-      }
-      setTranscript(finalText || interimText);
-      if (finalText) {
-        onResult(finalText);
-        setIsListening(false);
-      }
-    };
+        setTranscript(finalText || interimText);
+        if (finalText) {
+          onResult(finalText);
+          setIsListening(false);
+        }
+      };
 
-    recognition.onerror = () => setIsListening(false);
-    recognition.onend = () => setIsListening(false);
+      recognition.onerror = () => setIsListening(false);
+      recognition.onend = () => setIsListening(false);
 
-    recognitionRef.current = recognition;
-    recognition.start();
-    setIsListening(true);
-    setTranscript("");
-  }, []);
+      recognitionRef.current = recognition;
+      recognition.start();
+      setIsListening(true);
+      setTranscript("");
+    },
+    []
+  );
 
   const stopListening = useCallback(() => {
     recognitionRef.current?.stop();
