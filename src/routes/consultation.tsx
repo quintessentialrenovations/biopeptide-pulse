@@ -849,8 +849,8 @@ function ConsultationPage() {
       {/* Soundbar animation keyframes */}
       <style>{`
         @keyframes soundbar {
-          0% { height: 4px; }
-          100% { height: 18px; }
+          0% { transform: scaleY(0.35); opacity: 0.65; }
+          100% { transform: scaleY(1.15); opacity: 1; }
         }
         @keyframes lipSync {
           0%, 100% { height: 2px; opacity: 0.4; }
