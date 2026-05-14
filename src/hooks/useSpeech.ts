@@ -9,6 +9,12 @@ const SILENT_MP3 =
 let audioUnlocked = false;
 let audioBlocked = false;
 let sharedAudio: HTMLAudioElement | null = null;
+let sharedAudioContext: AudioContext | null = null;
+let sharedGainNode: GainNode | null = null;
+let sharedSourceNode: MediaElementAudioSourceNode | null = null;
+let speechVolume = 1;
+let speechMuted = false;
+let elevenLabsUnavailableUntil = 0;
 const blockedSubscribers = new Set<(blocked: boolean) => void>();
 
 function setAudioBlocked(v: boolean) {
@@ -38,6 +44,47 @@ function getSharedAudio(): HTMLAudioElement {
   return sharedAudio;
 }
 
+function getAudioContext(): AudioContext | null {
+  if (typeof window === "undefined") return null;
+  const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+  if (!AudioCtx) return null;
+  if (!sharedAudioContext) sharedAudioContext = new AudioCtx();
+  return sharedAudioContext;
+}
+
+function applyOutputLevel() {
+  if (sharedAudio) {
+    sharedAudio.muted = speechMuted;
+    sharedAudio.volume = speechMuted ? 0 : speechVolume;
+  }
+  if (sharedGainNode) {
+    sharedGainNode.gain.value = speechMuted ? 0 : Math.max(1, speechVolume * 2);
+  }
+}
+
+function ensureBoostGraph() {
+  try {
+    const audio = getSharedAudio();
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    if (!sharedSourceNode) {
+      sharedSourceNode = ctx.createMediaElementSource(audio);
+      sharedGainNode = ctx.createGain();
+      sharedSourceNode.connect(sharedGainNode);
+      sharedGainNode.connect(ctx.destination);
+    }
+    applyOutputLevel();
+  } catch {
+    /* MediaElementSource may already be attached by the browser; keep normal playback. */
+  }
+}
+
+export function setSpeechAudioOutput(options: { volume?: number; muted?: boolean }) {
+  if (typeof options.volume === "number") speechVolume = Math.min(1, Math.max(0, options.volume));
+  if (typeof options.muted === "boolean") speechMuted = options.muted;
+  applyOutputLevel();
+}
+
 /**
  * Call from a real user gesture (click/touch) BEFORE any programmatic audio playback.
  * Plays a silent MP3 through the shared <audio> element so iOS marks it as user-activated.
@@ -45,10 +92,12 @@ function getSharedAudio(): HTMLAudioElement {
  */
 export function unlockAudioPlayback() {
   try {
+    const ctx = getAudioContext();
+    if (ctx?.state === "suspended") void ctx.resume();
+    ensureBoostGraph();
     const a = getSharedAudio();
     a.src = SILENT_MP3;
-    a.muted = false;
-    a.volume = 1;
+    applyOutputLevel();
     const p = a.play();
     if (p && typeof p.then === "function") {
       p.then(() => {
