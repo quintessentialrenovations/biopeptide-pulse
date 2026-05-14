@@ -527,10 +527,10 @@ function ConsultationPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button onClick={() => { unlockAudioPlayback(); setVoiceEnabled(!voiceEnabled); if (voiceEnabled) stopSpeaking(); }}
-                  className={cn("p-2 rounded-xl transition-colors", !voiceEnabled ? "bg-destructive/10 text-destructive" : "bg-accent text-muted-foreground hover:text-foreground")}
-                  title={voiceEnabled ? "Silenciar voz" : "Activar voz"}>
-                  {voiceEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+                <button onClick={() => { unlockAudioPlayback(); const nextMuted = !isMuted; setIsMuted(nextMuted); setVoiceEnabled(true); if (nextMuted) stopSpeaking(); }}
+                  className={cn("p-2 rounded-xl transition-colors", isMuted ? "bg-destructive/10 text-destructive" : "bg-accent text-muted-foreground hover:text-foreground")}
+                  title={isMuted ? "Activar voz" : "Silenciar voz"}>
+                  {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
                 </button>
                 <Button variant="outline" size="sm" onClick={handleEndSession} className="rounded-xl text-xs gap-1">
                   <PhoneOff className="h-3.5 w-3.5" />
@@ -539,21 +539,37 @@ function ConsultationPage() {
               </div>
             </div>
 
-            {/* Audio blocked banner (mobile gesture unlock) */}
-            {audioBlocked && voiceEnabled && (
+            {/* Audio activation banner (mobile gesture unlock) */}
+            {voiceEnabled && (!audioActivated || audioBlocked) && (
               <button
-                onClick={() => {
-                  unlockAudioPlayback();
-                  // Re-speak the latest doctor message
-                  const lastDoctor = [...messages].reverse().find((m) => m.role === "doctor" && m.text);
-                  if (lastDoctor) speak(cleanForTTS(lastDoctor.text), locale);
-                }}
-                className="w-full mb-3 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-primary text-white font-semibold text-sm shadow-lg shadow-primary/30 animate-pulse"
+                onClick={activateHighAudio}
+                className="w-full mb-3 flex items-center justify-center gap-2 px-5 py-4 rounded-2xl bg-primary text-primary-foreground font-extrabold text-base shadow-lg shadow-primary/30 animate-pulse"
               >
-                <Volume2 className="h-5 w-5" />
-                Toca aquí para activar el sonido del Dr. IA
+                <Volume2 className="h-6 w-6" />
+                🔊 Activar Sonido Alto
               </button>
             )}
+
+            <div className="glass-card rounded-2xl p-3 mb-3 flex flex-col sm:flex-row sm:items-center gap-3">
+              <div className="flex items-center gap-2 sm:w-44">
+                <button
+                  onClick={() => { const nextMuted = !isMuted; setIsMuted(nextMuted); if (nextMuted) stopSpeaking(); }}
+                  className={cn("h-10 w-10 rounded-xl flex items-center justify-center transition-colors", isMuted ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary")}
+                  title={isMuted ? "Activar sonido" : "Silenciar"}
+                >
+                  {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
+                </button>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-foreground">Volumen alto móvil</p>
+                  <p className="text-[11px] text-muted-foreground">Español latino neutral</p>
+                </div>
+              </div>
+              <Slider value={[voiceVolume]} min={0} max={1} step={0.05} onValueChange={([value]) => setVoiceVolume(value ?? 1)} className="flex-1" />
+              <div className="grid grid-cols-2 gap-1 rounded-xl bg-accent p-1 sm:w-44">
+                <button onClick={() => setVoiceGender("female")} className={cn("rounded-lg px-2 py-1.5 text-xs font-bold transition-colors", voiceGender === "female" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground")}>Dra.</button>
+                <button onClick={() => setVoiceGender("male")} className={cn("rounded-lg px-2 py-1.5 text-xs font-bold transition-colors", voiceGender === "male" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground")}>Dr.</button>
+              </div>
+            </div>
 
             {/* Headphones recommendation */}
             <p className="text-[11px] text-muted-foreground text-center mb-3">
