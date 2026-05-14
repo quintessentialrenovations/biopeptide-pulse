@@ -226,6 +226,7 @@ export function useSpeechSynthesis() {
 function fallbackBrowserTTS(
   text: string,
   locale: "es" | "en",
+  voiceGender: VoiceGender,
   setIsSpeaking: (v: boolean) => void
 ) {
   if (typeof window === "undefined" || !window.speechSynthesis) {
@@ -242,7 +243,7 @@ function fallbackBrowserTTS(
   const preferredSpanish = ["es-MX", "es-US", "es-CO", "es-PE", "es-419"];
   const voice =
     (locale === "es"
-      ? voices.find((v) => preferredSpanish.includes(v.lang) && !/spain|españa|es-ES/i.test(`${v.name} ${v.lang}`)) ||
+      ? voices.find((v) => preferredSpanish.includes(v.lang) && !/spain|españa|es-ES/i.test(`${v.name} ${v.lang}`) && (voiceGender === "male" ? /male|diego|jorge|carlos|miguel|juan/i.test(v.name) : !/male|diego|jorge|carlos|miguel|juan/i.test(v.name))) ||
         voices.find((v) => v.lang.startsWith("es") && !/spain|españa|es-ES/i.test(`${v.name} ${v.lang}`))
       : voices.find((v) => v.lang.startsWith("en") && /female|samantha|google|natural/i.test(v.name)) ||
         voices.find((v) => v.lang.startsWith("en"))) ||
