@@ -602,7 +602,7 @@ function ConsultationPage() {
                     {/* Lip-sync overlay */}
                     {isSpeaking && (
                       <div className="absolute bottom-[18%] left-1/2 -translate-x-1/2 w-[28%]">
-                        <div className="lip-sync-mouth rounded-full bg-[#8B4513]/60 backdrop-blur-[1px]" />
+                        <div className="lip-sync-mouth rounded-full bg-bio-peach/70 backdrop-blur-[1px]" />
                       </div>
                     )}
                   </div>
@@ -612,13 +612,13 @@ function ConsultationPage() {
                     {isSpeaking ? (
                       <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-bio-success/20 backdrop-blur-sm">
                         <div className="flex items-center gap-0.5">
-                          {[1, 2, 3, 4, 5].map((i) => (
+                          {[18, 28, 38, 30, 22, 34, 24].map((height, i) => (
                             <div
                               key={i}
-                              className="w-1 bg-bio-success rounded-full"
+                              className="w-1.5 bg-bio-success rounded-full"
                               style={{
-                                animation: `soundbar 0.${3 + i}s ease-in-out infinite alternate`,
-                                height: `${8 + Math.random() * 12}px`,
+                                animation: `soundbar 0.${45 + i * 6}s ease-in-out infinite alternate`,
+                                height: `${height}px`,
                               }}
                             />
                           ))}
@@ -647,6 +647,13 @@ function ConsultationPage() {
                 </div>
               </div>
             </div>
+
+            {lastReadText && (
+              <div className="mb-4 rounded-2xl border border-primary/15 bg-primary/5 px-4 py-3">
+                <p className="text-[11px] font-bold uppercase tracking-wide text-primary mb-1">Texto que está leyendo la voz</p>
+                <p className="text-sm leading-relaxed text-foreground line-clamp-3">{lastReadText}</p>
+              </div>
+            )}
 
             {/* Chat messages */}
             <div className="glass-card rounded-2xl p-4 mb-4 max-h-[300px] overflow-y-auto space-y-3">
