@@ -77,7 +77,7 @@ const questionnaireSteps: QStep[] = [
 const AI_DOCTOR_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-doctor`;
 
 function ConsultationPage() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const navigate = useNavigate();
   const [phase, setPhase] = useState<Phase>("intro");
   const [currentStep, setCurrentStep] = useState(0);
