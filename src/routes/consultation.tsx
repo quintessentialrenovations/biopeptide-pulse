@@ -187,7 +187,7 @@ function ConsultationPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ messages: apiMessages, patientContext: buildPatientContext() }),
+        body: JSON.stringify({ messages: apiMessages, patientContext: buildPatientContext(), locale }),
       });
 
       if (!resp.ok || !resp.body) {
@@ -252,7 +252,7 @@ function ConsultationPage() {
       setMessages((prev) => [...prev, { role: "doctor", text: "⚠️ Error de conexión. Por favor intenta de nuevo." }]);
     }
     setIsAiLoading(false);
-  }, [buildPatientContext]);
+  }, [buildPatientContext, locale]);
 
   const toggleSelection = (stepId: string, option: string, multi: boolean) => {
     setSelections((prev) => {
@@ -283,7 +283,10 @@ function ConsultationPage() {
       setPhase("chat");
       setChatStartTime(Date.now());
       const patientName = fieldValues["q.patientName"] || "";
-      const initialMsg: Message = { role: "user", text: `Hola Doctor, me llamo ${patientName}. Acabo de completar el cuestionario. Estoy listo para mi consulta.` };
+      const initialText = locale === "en"
+        ? `Hello Doctor, my name is ${patientName}. I just completed the questionnaire. I am ready for my consultation.`
+        : `Hola Doctor, me llamo ${patientName}. Acabo de completar el cuestionario. Estoy listo para mi consulta.`;
+      const initialMsg: Message = { role: "user", text: initialText };
       const initialMessages = [initialMsg];
       setMessages([initialMsg]);
       streamAiResponse(initialMessages);
@@ -339,7 +342,10 @@ function ConsultationPage() {
       setPhase("chat");
       setChatStartTime(Date.now());
       const patientName = fieldValues["q.patientName"] || "";
-      const initialMsg: Message = { role: "user", text: `Hola Doctor, me llamo ${patientName}. Tengo algunas condiciones médicas pero quiero continuar con la consulta.` };
+      const initialText = locale === "en"
+        ? `Hello Doctor, my name is ${patientName}. I have some medical conditions but I want to continue with the consultation.`
+        : `Hola Doctor, me llamo ${patientName}. Tengo algunas condiciones médicas pero quiero continuar con la consulta.`;
+      const initialMsg: Message = { role: "user", text: initialText };
       setMessages([initialMsg]);
       streamAiResponse([initialMsg]);
     }
