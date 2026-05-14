@@ -151,8 +151,8 @@ serve(async (req) => {
       const err = await response.text();
       console.error("ElevenLabs error:", err);
       return new Response(
-        JSON.stringify({ error: "TTS generation failed" }),
-        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: err.includes("invalid_api_key") ? "Invalid ElevenLabs API key" : "Premium TTS temporarily unavailable" }),
+        { status: err.includes("invalid_api_key") ? 200 : 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
