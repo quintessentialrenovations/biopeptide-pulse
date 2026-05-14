@@ -161,22 +161,26 @@ export function useSpeechSynthesis() {
       try {
         setIsSpeaking(true);
 
-        const { data, error } = await supabase.functions.invoke("elevenlabs-tts", {
-          body: { text: trimmed, locale },
-        });
+        const shouldTryElevenLabs = Date.now() > elevenLabsUnavailableUntil;
+        const { data, error } = shouldTryElevenLabs
+          ? await supabase.functions.invoke("elevenlabs-tts", {
+              body: { text: trimmed, locale, voiceGender: "female", mobileBoost: true },
+            })
+          : { data: null, error: new Error("Premium TTS temporarily unavailable") };
 
         if (controller.signal.aborted) return;
 
         if (error || !data?.audio) {
           console.warn("ElevenLabs TTS failed, falling back to browser TTS:", error);
+          elevenLabsUnavailableUntil = Date.now() + 60_000;
           fallbackBrowserTTS(trimmed, locale, setIsSpeaking);
           return;
         }
 
         const audio = getSharedAudio();
         audio.src = `data:audio/mpeg;base64,${data.audio}`;
-        audio.muted = false;
-        audio.volume = 1;
+        ensureBoostGraph();
+        applyOutputLevel();
 
         const onEnd = () => {
           setIsSpeaking(false);
