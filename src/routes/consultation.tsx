@@ -331,6 +331,7 @@ function ConsultationPage() {
   };
 
   const advanceFromRedFlag = () => {
+    unlockAudioPlayback();
     setShowRedFlag(false);
     if (currentStep < questionnaireSteps.length - 1) setCurrentStep(currentStep + 1);
     else {
