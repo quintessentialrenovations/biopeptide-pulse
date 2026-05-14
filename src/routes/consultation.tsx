@@ -299,17 +299,19 @@ function ConsultationPage() {
   };
 
   const handleVoiceInput = () => {
+    unlockAudioPlayback();
     if (isListening) {
       stopListening();
     } else {
       stopSpeaking();
       startListening((text) => {
         handleSendChat(text);
-      });
+      }, locale);
     }
   };
 
   const toggleConversationMode = () => {
+    unlockAudioPlayback();
     if (conversationMode) {
       // Stop conversation mode
       setConversationMode(false);
@@ -322,7 +324,7 @@ function ConsultationPage() {
       stopSpeaking();
       startListening((text) => {
         handleSendChat(text);
-      });
+      }, locale);
     }
   };
 
