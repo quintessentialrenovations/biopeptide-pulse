@@ -389,7 +389,7 @@ function ConsultationPage() {
               <ConsultFeature icon={Video} title={t("consult.liveChat")} desc={t("consult.liveChatDesc")} />
               <ConsultFeature icon={FileText} title={t("consult.doctorSummary")} desc={t("consult.doctorSummaryDesc")} />
             </div>
-            <Button variant="hero" size="lg" onClick={() => setPhase("questionnaire")} className="rounded-2xl px-10">
+            <Button variant="hero" size="lg" onClick={() => { unlockAudioPlayback(); setPhase("questionnaire"); }} className="rounded-2xl px-10">
               {t("consult.startConsultation")} <Play className="h-4 w-4 ml-1" />
             </Button>
             <p className="mt-6 text-xs text-muted-foreground max-w-md mx-auto">{t("consult.duration")}</p>
