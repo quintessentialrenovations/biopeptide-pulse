@@ -16,6 +16,7 @@ let speechVolume = 1;
 let speechMuted = false;
 let elevenLabsUnavailableUntil = 0;
 const blockedSubscribers = new Set<(blocked: boolean) => void>();
+export type VoiceGender = "female" | "male";
 
 function setAudioBlocked(v: boolean) {
   if (audioBlocked === v) return;
@@ -151,7 +152,7 @@ export function useSpeechSynthesis() {
   }, []);
 
   const speak = useCallback(
-    async (text: string, locale: "es" | "en" = "es") => {
+    async (text: string, locale: "es" | "en" = "es", voiceGender: VoiceGender = "female") => {
       stop();
       const trimmed = text.slice(0, 4500);
 
@@ -164,7 +165,7 @@ export function useSpeechSynthesis() {
         const shouldTryElevenLabs = Date.now() > elevenLabsUnavailableUntil;
         const { data, error } = shouldTryElevenLabs
           ? await supabase.functions.invoke("elevenlabs-tts", {
-              body: { text: trimmed, locale, voiceGender: "female", mobileBoost: true },
+              body: { text: trimmed, locale, voiceGender, mobileBoost: true },
             })
           : { data: null, error: new Error("Premium TTS temporarily unavailable") };
 
@@ -173,7 +174,7 @@ export function useSpeechSynthesis() {
         if (error || !data?.audio) {
           console.warn("ElevenLabs TTS failed, falling back to browser TTS:", error);
           elevenLabsUnavailableUntil = Date.now() + 60_000;
-          fallbackBrowserTTS(trimmed, locale, setIsSpeaking);
+          fallbackBrowserTTS(trimmed, locale, voiceGender, setIsSpeaking);
           return;
         }
 
@@ -193,7 +194,7 @@ export function useSpeechSynthesis() {
           audio.removeEventListener("error", onErr);
           // If playback fails (often mobile gesture issue), fall back to browser TTS
           console.warn("Audio element playback failed, falling back to browser TTS");
-          fallbackBrowserTTS(trimmed, locale, setIsSpeaking);
+          fallbackBrowserTTS(trimmed, locale, voiceGender, setIsSpeaking);
         };
         audio.addEventListener("ended", onEnd);
         audio.addEventListener("error", onErr);
@@ -207,12 +208,12 @@ export function useSpeechSynthesis() {
           audio.removeEventListener("ended", onEnd);
           audio.removeEventListener("error", onErr);
           setAudioBlocked(true);
-          fallbackBrowserTTS(trimmed, locale, setIsSpeaking);
+          fallbackBrowserTTS(trimmed, locale, voiceGender, setIsSpeaking);
         }
       } catch (err) {
         if (controller.signal.aborted) return;
         console.warn("ElevenLabs TTS error, falling back:", err);
-        fallbackBrowserTTS(trimmed, locale, setIsSpeaking);
+        fallbackBrowserTTS(trimmed, locale, voiceGender, setIsSpeaking);
       }
     },
     [stop]
